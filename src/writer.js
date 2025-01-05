@@ -1,5 +1,30 @@
+class Cell {
+    constructor() {
+        this.foregroundColor = '#eeeeee';
+        this.backgroundColor = '#111111';
+        this.character = null;
+
+        //this.foregroundMode
+        //this.backgroundMode
+        //this.afterglowCounter
+    }
+}
+
+class Cursor {
+    constructor() {
+        /** @type {number} */
+        this.col = 0;
+
+        /** @type {number} */
+        this.row = 0;
+
+        /** @type {Cell} */
+        this.cell = new Cell();
+    }
+}
+
 export class Writer {
-    constructor(canvas, width, height) {
+    constructor(canvas, width, height, cols = 40, rows = 25) {
         /** @type {HTMLCanvasElement} */
         this.canvas = canvas;
 
@@ -8,6 +33,17 @@ export class Writer {
 
         /** @type {CanvasRenderingContext2D} */
         this.ctx = canvas.getContext('2d');
+
+        /** @type {number} */
+        this.cols = cols;
+
+        /** @type {number} */
+        this.rows = rows;
+
+        this.borderWidth = 2;
+        this.borderColor = '#333';
+
+        this.debugColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
 
         this.init();
     }
@@ -18,6 +54,31 @@ export class Writer {
 
         /** @type {*} */
         this.debug = null;
+
+        /** @type {Cell[]} */
+        this.cells = [];
+        for (let i = 0; i < this.cols * this.rows; i++) {
+            this.cells.push(new Cell());
+        }
+
+        /** @type {number} Cycle value between 0 and 255 */
+        this.cycleLastTimestamp = 0;
+
+        /** @type {number} Cycle value between 0 and 255 */
+        this.cycleVal = 0;
+
+        /** @type {bool} Cycle direction (up=true, down=false) */
+        this.cycleUp = true;
+
+        /** @type {number} Speed between 0 and 1 */
+        this.speed = .5;
+
+        /** @type {Cursor} */
+        this.cursor = new Cursor();
+        this.cursor.cell.backgroundColor = '#eeeeee';
+
+        this.cellWidth = (this.canvas.width - this.borderWidth * 2) / this.cols;
+        this.cellHeight = (this.canvas.height - this.borderWidth * 2) / this.rows;
     }
 
     mainLoop(timestamp) {
@@ -32,16 +93,43 @@ export class Writer {
         requestAnimationFrame(this.mainLoop.bind(this));
     }
 
+    getCell(col, row) {
+        return this.cells[row * this.cols + col];
+    }
+
     #handleInput() {
     }
 
     #update(timestamp) {
+        const msCycleWait = 50 * (1 - this.speed);
+
+        if (timestamp - this.cycleLastTimestamp > msCycleWait) {
+            // TODO: Cycle with quadratic function instead of linear?
+            if (this.cycleUp) {
+                this.cycleVal+=10;
+                if (this.cycleVal >= 255) {
+                    this.cycleVal = 255;
+                    this.cycleUp = false;
+                }
+            } else {
+                this.cycleVal-=10;
+                if (this.cycleVal <= 0) {
+                    this.cycleVal = 0;
+                    this.cycleUp = true;
+                }
+            }
+
+            this.cycleLastTimestamp = timestamp;
+        }
     }
 
     #render(fps) {
         const c = this.ctx;
 
         c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        this.#renderCells();
+        this.#renderCursor();
 
         this.#renderInfo(fps);
         this.#renderDebug();
@@ -65,5 +153,93 @@ export class Writer {
 
         c.fillStyle = 'Red';
         c.fillText(JSON.stringify(this.debug), 2, 30);
+    }
+
+    #renderCells() {
+        const c = this.ctx;
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                let cell = this.getCell(col, row);
+
+                c.beginPath();
+                c.rect(
+                    col * this.cellWidth + this.borderWidth/2, row * this.cellHeight + this.borderWidth/2,
+                    this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
+                );
+
+                c.fillStyle = cell.backgroundColor;
+                c.fill();
+
+                c.lineWidth = this.borderWidth;
+                c.strokeStyle = this.borderColor;   // this.debugColors[((col + 1) * (row + 1)) % this.debugColors.length]
+                c.stroke();
+            }
+        }
+    }
+
+    #renderCursor() {
+        const c = this.ctx;
+        const cursor = this.cursor;
+        const col = cursor.col;
+        const row = cursor.row;
+
+        c.beginPath();
+        c.rect(
+            col * this.cellWidth + this.borderWidth/2, row * this.cellHeight + this.borderWidth/2,
+            this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
+        );
+
+        c.fillStyle = cursor.cell.backgroundColor + this.cycleVal.toString(16).padStart(2, '0') /* transparency */;
+        c.fill();
+
+        c.lineWidth = this.borderWidth;
+        c.strokeStyle = this.borderColor;
+        c.stroke();
+    }
+
+    cursorUp() {
+        if (this.cursor.row === 0) {
+            return;
+        }
+
+        this.cursor.row--;
+    }
+
+    cursorDown() {
+        // TODO: Scroll
+        if (this.cursor.row === this.rows - 1) {
+            return;
+        }
+
+        this.cursor.row++;
+    }
+
+    cursorLeft() {
+        if (this.cursor.col === 0) {
+            this.cursor.col = this.cols - 1;
+        } else {
+            this.cursor.col--;
+        }
+    }
+
+    cursorRight() {
+        if (this.cursor.col === this.cols - 1) {
+            this.cursor.col = 0;
+        } else {
+            this.cursor.col++;
+        }
+    }
+
+    testAction() {
+        const cursor = this.cursor;
+        const col = cursor.col;
+        const row = cursor.row;
+        const cell = this.getCell(col, row);
+
+        cursor.cell.backgroundColor = this.debugColors[(row * this.cols + col) % this.debugColors.length];
+        cell.backgroundColor = cursor.cell.backgroundColor;
+
+        this.cursorRight();
     }
 }
