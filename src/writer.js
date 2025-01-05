@@ -1,7 +1,11 @@
 class Cell {
     constructor() {
         this.foregroundColor = '#eeeeee';
-        this.backgroundColor = '#111111';
+        this.foregroundPulse = false;
+
+        this.backgroundColor = null;
+        this.backgroundPulse = true;
+
         this.character = null;
 
         //this.foregroundMode
@@ -40,8 +44,10 @@ export class Writer {
         /** @type {number} */
         this.rows = rows;
 
+        this.backgroundColor = '#111111';
+
         this.borderWidth = 2;
-        this.borderColor = '#333';
+        this.borderColor = '#222222';
 
         this.debugColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
 
@@ -112,7 +118,7 @@ export class Writer {
                     this.cycleUp = false;
                 }
             } else {
-                this.cycleVal-=10;
+                this.cycleVal-=20;
                 if (this.cycleVal <= 0) {
                     this.cycleVal = 0;
                     this.cycleUp = true;
@@ -168,7 +174,14 @@ export class Writer {
                     this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
                 );
 
-                c.fillStyle = cell.backgroundColor;
+                let backgroundColor = this.backgroundColor;
+                if (cell.backgroundColor !== null) {
+                    backgroundColor = cell.backgroundColor;
+                    if (cell.backgroundPulse) {
+                        backgroundColor += this.cycleVal.toString(16).padStart(2, '0') /* transparency */;
+                    }
+                }
+                c.fillStyle = backgroundColor;
                 c.fill();
 
                 c.lineWidth = this.borderWidth;
