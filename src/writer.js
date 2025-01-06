@@ -6,11 +6,12 @@ class Cell {
         this.backgroundColor = null;
         this.backgroundPulse = true;
 
-        this.character = null;
+        this.afterglowColor = null;
+        this.afterglowCounter = null;
 
+        //this.character = null;
         //this.foregroundMode
         //this.backgroundMode
-        //this.afterglowCounter
     }
 }
 
@@ -103,6 +104,10 @@ export class Writer {
         return this.cells[row * this.cols + col];
     }
 
+    static #to2DigitHex(value) {
+        return value.toString(16).padStart(2, '0');
+    }
+
     #handleInput() {
     }
 
@@ -112,13 +117,13 @@ export class Writer {
         if (timestamp - this.cycleLastTimestamp > msCycleWait) {
             // TODO: Cycle with quadratic function instead of linear?
             if (this.cycleUp) {
-                this.cycleVal+=10;
+                this.cycleVal += 10;
                 if (this.cycleVal >= 255) {
                     this.cycleVal = 255;
                     this.cycleUp = false;
                 }
             } else {
-                this.cycleVal-=20;
+                this.cycleVal -= 20;
                 if (this.cycleVal <= 0) {
                     this.cycleVal = 0;
                     this.cycleUp = true;
@@ -175,13 +180,21 @@ export class Writer {
                 );
 
                 let backgroundColor = this.backgroundColor;
+                let transparency = null;
                 if (cell.backgroundColor !== null) {
                     backgroundColor = cell.backgroundColor;
                     if (cell.backgroundPulse) {
-                        backgroundColor += this.cycleVal.toString(16).padStart(2, '0') /* transparency */;
+                        transparency = this.cycleVal;
+                    }
+                } else if (cell.afterglowCounter !== null) {
+                    backgroundColor = cell.afterglowColor;
+                    transparency = Math.ceil(cell.afterglowCounter * .5);
+                    cell.afterglowCounter -= 5;
+                    if (cell.afterglowCounter <= 0) {
+                        cell.afterglowCounter = null;
                     }
                 }
-                c.fillStyle = backgroundColor;
+                c.fillStyle = backgroundColor + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.fill();
 
                 c.lineWidth = this.borderWidth;
@@ -203,7 +216,7 @@ export class Writer {
             this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
         );
 
-        c.fillStyle = cursor.cell.backgroundColor + this.cycleVal.toString(16).padStart(2, '0') /* transparency */;
+        c.fillStyle = cursor.cell.backgroundColor + Writer.#to2DigitHex(this.cycleVal) /* transparency */;
         c.fill();
 
         c.lineWidth = this.borderWidth;
@@ -216,6 +229,7 @@ export class Writer {
             return;
         }
 
+        this.triggerAfterglow();
         this.cursor.row--;
     }
 
@@ -225,10 +239,12 @@ export class Writer {
             return;
         }
 
+        this.triggerAfterglow();
         this.cursor.row++;
     }
 
     cursorLeft() {
+        this.triggerAfterglow();
         if (this.cursor.col === 0) {
             this.cursor.col = this.cols - 1;
         } else {
@@ -237,6 +253,7 @@ export class Writer {
     }
 
     cursorRight() {
+        this.triggerAfterglow();
         if (this.cursor.col === this.cols - 1) {
             this.cursor.col = 0;
         } else {
@@ -254,5 +271,16 @@ export class Writer {
         cell.backgroundColor = cursor.cell.backgroundColor;
 
         this.cursorRight();
+    }
+
+    triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
+        const cell = this.getCell(col, row);
+
+        if (color === null) {
+            color = '#eeeeee';
+        }
+
+        cell.afterglowColor = color;
+        cell.afterglowCounter = this.cycleVal;
     }
 }
