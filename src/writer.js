@@ -89,13 +89,13 @@ export class Writer {
 
         /** @type {Cell} */
         this.globalStyle = new Cell();
+        this.globalStyle.foregroundColor = '#eeeeee';
         this.globalStyle.backgroundColor = '#111111';
         this.globalStyle.borderColor = '#222222';
         this.borderWidth = 2;
 
         /** @type {Cursor} */
         this.cursor = new Cursor();
-        this.cursor.cell.foregroundColor = '#eeeeee';
 
         this.cellWidth = (this.canvas.width - this.borderWidth * 2) / this.cols;
         this.cellHeight = (this.canvas.height - this.borderWidth * 2) / this.rows;
@@ -397,6 +397,11 @@ export class Writer {
      */
     setColor(scope, target, color) {
         const cell = scope === 'cursor' ? this.cursor.cell : this.globalStyle;
+
+        if (scope === 'global' && color === null) {
+            console.warn(`Not unsetting global color for ${target}`);
+            return;
+        }
 
         if (target === 'foreground') {
             cell.foregroundColor = color;
