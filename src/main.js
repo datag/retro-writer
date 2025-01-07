@@ -14,6 +14,7 @@ let colorTarget = 'background';
 
 window.addEventListener('keydown', (event) => {
     switch (true) {
+        // FIXME: Don't use 0-9...
         case event.key >= '0' && event.key <= '9':
             const color = Writer.debugColors[(Number(event.key) + 9) % Writer.debugColors.length];
             if (colorTarget === 'foreground') {
@@ -74,6 +75,12 @@ window.addEventListener('keydown', (event) => {
             } else {
                 console.error(`Unhandled color target '${colorTarget}'`);
             }
+            break;
+        case event.key === 'Delete':
+            writer.clearCell(false);
+            break;
+        case event.key === 'Backspace':
+            writer.clearCell(true);
             break;
         case event.key.length == 1:
             writer.character(event.key, true);

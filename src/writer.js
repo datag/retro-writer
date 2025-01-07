@@ -276,6 +276,7 @@ export class Writer {
     cursorDown() {
         // TODO: Scroll
         if (this.cursor.row === this.rows - 1) {
+            console.warn('TODO: Implement scrolling');
             return;
         }
 
@@ -301,7 +302,7 @@ export class Writer {
         }
     }
 
-    character(character, advance = true) {
+    character(character, advance = false) {
         const cursor = this.cursor;
         const col = cursor.col;
         const row = cursor.row;
@@ -325,13 +326,33 @@ export class Writer {
                     cursor.col = 0;
                     cursor.row += 1;
                 } else {
-                    // TODO:scroll
+                    // TODO: Scroll
+                    console.warn('TODO: Implement scrolling');
                 }
             } else {
                 this.triggerAfterglow();
                 cursor.col++;
             }
         }
+    }
+
+    clearCell(retract = false) {
+        const cursor = this.cursor;
+
+        if (retract) {
+            if (cursor.col === 0) {
+                if (cursor.row !== 0) {
+                    this.triggerAfterglow();
+                    cursor.col = this.cols - 1;
+                    cursor.row -= 1;
+                }
+            } else {
+                this.triggerAfterglow();
+                cursor.col--;
+            }
+        }
+
+        this.cells[cursor.row * this.cols + cursor.col] = new Cell();
     }
 
     triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
