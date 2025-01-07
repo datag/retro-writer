@@ -13,7 +13,7 @@ writer.mainLoop();
 let colorTarget = 'background';
 
 window.addEventListener('keydown', (event) => {
-    let notHandled = false;
+    let handled = true;
 
     switch (true) {
         case event.ctrlKey && event.key >= '0' && event.key <= '9':
@@ -75,22 +75,25 @@ window.addEventListener('keydown', (event) => {
             }
             break;
         case event.key === 'Delete':
-            writer.clearCell(false);
+            writer.clearCell();
             break;
         case event.key === 'Backspace':
-            writer.clearCell(true);
+            if (writer.retract()) {
+                writer.clearCell();
+            }
             break;
         case event.key.length == 1:
-            writer.character(event.key, true);
+            writer.character(event.key);
+            writer.advance();
             break;
         default:
-            notHandled = true;
+            handled = false;
             console.log(`Key:'${event.key}' Shift:${event.shiftKey ? 'yes' : 'no'} Ctrl:${event.ctrlKey ? 'yes' : 'no'} Alt:${event.altKey ? 'yes' : 'no'}`);
             break;
     }
 
     // Omit browser default behavior in case we handled the key
-    if (notHandled === false) {
+    if (handled) {
         event.preventDefault();
     }
 });

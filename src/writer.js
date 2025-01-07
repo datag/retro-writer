@@ -302,7 +302,47 @@ export class Writer {
         }
     }
 
-    character(character, advance = false) {
+    advance() {
+        const cursor = this.cursor;
+
+        if (cursor.col === this.cols - 1) {
+            if (cursor.row !== this.rows - 1) {
+                this.triggerAfterglow();
+                cursor.col = 0;
+                cursor.row++;
+            } else {
+                // TODO: Scroll
+                console.warn('TODO: Implement scrolling');
+                return false;
+            }
+        } else {
+            this.triggerAfterglow();
+            cursor.col++;
+        }
+
+        return true;
+    }
+
+    retract() {
+        const cursor = this.cursor;
+
+        if (cursor.col === 0) {
+            if (cursor.row !== 0) {
+                this.triggerAfterglow();
+                cursor.col = this.cols - 1;
+                cursor.row--;
+            } else {
+                return false;
+            }
+        } else {
+            this.triggerAfterglow();
+            cursor.col--;
+        }
+
+        return true;
+    }
+
+    character(character) {
         const cursor = this.cursor;
         const col = cursor.col;
         const row = cursor.row;
@@ -318,39 +358,10 @@ export class Writer {
 
         cell.borderColor = cursor.cell.borderColor;
         cell.borderPulse = cursor.cell.borderPulse;
-
-        if (advance) {
-            if (cursor.col === this.cols - 1) {
-                if (cursor.row !== this.rows - 1) {
-                    this.triggerAfterglow();
-                    cursor.col = 0;
-                    cursor.row += 1;
-                } else {
-                    // TODO: Scroll
-                    console.warn('TODO: Implement scrolling');
-                }
-            } else {
-                this.triggerAfterglow();
-                cursor.col++;
-            }
-        }
     }
 
-    clearCell(retract = false) {
+    clearCell() {
         const cursor = this.cursor;
-
-        if (retract) {
-            if (cursor.col === 0) {
-                if (cursor.row !== 0) {
-                    this.triggerAfterglow();
-                    cursor.col = this.cols - 1;
-                    cursor.row -= 1;
-                }
-            } else {
-                this.triggerAfterglow();
-                cursor.col--;
-            }
-        }
 
         this.cells[cursor.row * this.cols + cursor.col] = new Cell();
     }
