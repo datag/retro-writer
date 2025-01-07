@@ -1,6 +1,6 @@
 class Cell {
     constructor() {
-        this.foregroundColor = '#eeeeee';
+        this.foregroundColor = null;
         this.foregroundPulse = false;
 
         this.backgroundColor = null;
@@ -12,9 +12,7 @@ class Cell {
         this.afterglowColor = null;
         this.afterglowCounter = null;
 
-        //this.character = null;
-        //this.foregroundMode
-        //this.backgroundMode
+        this.character = null;
     }
 }
 
@@ -48,15 +46,21 @@ export class Writer {
         /** @type {number} */
         this.rows = rows;
 
-        this.backgroundColor = '#111111';
-
-        this.borderWidth = 2;
-        this.borderColor = '#222222';
-
-        this.debugColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-
         this.init();
     }
+
+    static debugColors = [
+        '#ff0000', // Red
+        '#00ff00', // Green
+        '#3399ff', // Lighter Blue
+        '#ffff00', // Yellow
+        '#ff00ff', // Magenta
+        '#00ffff', // Cyan
+        '#ff9900', // Orange
+        '#9900ff', // Purple
+        '#eeeeee', // Almost white
+        '#111111', // Almost black
+    ];
 
     init() {
         /** @type {number} */
@@ -83,9 +87,13 @@ export class Writer {
         /** @type {number} Speed between 0 and 1 */
         this.speed = .5;
 
+        this.backgroundColor = '#111111';
+        this.borderColor = '#222222';
+        this.borderWidth = 2;
+
         /** @type {Cursor} */
         this.cursor = new Cursor();
-        this.cursor.cell.backgroundColor = '#eeeeee';
+        this.cursor.cell.foregroundColor = '#eeeeee';
 
         this.cellWidth = (this.canvas.width - this.borderWidth * 2) / this.cols;
         this.cellHeight = (this.canvas.height - this.borderWidth * 2) / this.rows;
@@ -174,8 +182,9 @@ export class Writer {
 
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                let cell = this.getCell(col, row);
+                const cell = this.getCell(col, row);
 
+                // Background
                 c.beginPath();
                 c.rect(
                     col * this.cellWidth + this.borderWidth/2, row * this.cellHeight + this.borderWidth/2,
@@ -200,6 +209,7 @@ export class Writer {
                 c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.fill();
 
+                // Border
                 color = this.borderColor;
                 transparency = null;
                 if (cell.borderColor !== null) {
@@ -211,6 +221,24 @@ export class Writer {
                 c.strokeStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.lineWidth = this.borderWidth;
                 c.stroke();
+
+                // Character
+                if (cell.character !== null) {
+                    const fontSize = this.cellHeight * .6;
+                    color = cell.foregroundColor;
+                    transparency = null;
+                    if (cell.foregroundPulse) {
+                        transparency = this.cycleVal;
+                    }
+                    c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
+                    c.font = `bold ${fontSize}px monospace`;
+                    const metrics = c.measureText(cell.character);
+                    c.fillText(
+                        cell.character,
+                        col * this.cellWidth + this.cellWidth/2 + this.borderWidth/2 - metrics.width / 2,
+                        row * this.cellHeight + this.cellHeight + this.borderWidth/2 - fontSize / 2,
+                    );
+                }
             }
         }
     }
@@ -227,11 +255,12 @@ export class Writer {
             this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
         );
 
-        c.fillStyle = cursor.cell.backgroundColor + Writer.#to2DigitHex(this.cycleVal) /* transparency */;
+        let color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
+        c.fillStyle = color + Writer.#to2DigitHex(this.cycleVal) /* transparency */;
         c.fill();
 
         c.lineWidth = this.borderWidth;
-        c.strokeStyle = this.borderColor;
+        c.strokeStyle = cursor.cell.borderColor + Writer.#to2DigitHex(this.cycleVal) /* transparency */;
         c.stroke();
     }
 
@@ -272,34 +301,37 @@ export class Writer {
         }
     }
 
-    testBackground() {
+    character(character, advance = true) {
         const cursor = this.cursor;
         const col = cursor.col;
         const row = cursor.row;
         const cell = this.getCell(col, row);
 
-        cursor.cell.backgroundColor = this.debugColors[(row * this.cols + col) % this.debugColors.length];
-        cursor.cell.backgroundPulse = true;
+        cell.character = character;
+
+        cell.foregroundColor = cursor.cell.foregroundColor;
+        cell.foregroundPulse = cursor.cell.foregroundPulse;
 
         cell.backgroundColor = cursor.cell.backgroundColor;
         cell.backgroundPulse = cursor.cell.backgroundPulse;
 
-        this.cursorRight();
-    }
-
-    testBorder() {
-        const cursor = this.cursor;
-        const col = cursor.col;
-        const row = cursor.row;
-        const cell = this.getCell(col, row);
-
-        cursor.cell.borderColor = this.debugColors[(row * this.cols + col) % this.debugColors.length];
-        cursor.cell.borderPulse = true;
-
         cell.borderColor = cursor.cell.borderColor;
         cell.borderPulse = cursor.cell.borderPulse;
 
-        this.cursorRight();
+        if (advance) {
+            if (cursor.col === this.cols - 1) {
+                if (cursor.row !== this.rows - 1) {
+                    this.triggerAfterglow();
+                    cursor.col = 0;
+                    cursor.row += 1;
+                } else {
+                    // TODO:scroll
+                }
+            } else {
+                this.triggerAfterglow();
+                cursor.col++;
+            }
+        }
     }
 
     triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
