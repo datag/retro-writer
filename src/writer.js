@@ -4,7 +4,10 @@ class Cell {
         this.foregroundPulse = false;
 
         this.backgroundColor = null;
-        this.backgroundPulse = true;
+        this.backgroundPulse = false;
+
+        this.borderColor = null;
+        this.borderPulse = false;
 
         this.afterglowColor = null;
         this.afterglowCounter = null;
@@ -179,26 +182,34 @@ export class Writer {
                     this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
                 );
 
-                let backgroundColor = this.backgroundColor;
+                let color = this.backgroundColor;
                 let transparency = null;
                 if (cell.backgroundColor !== null) {
-                    backgroundColor = cell.backgroundColor;
+                    color = cell.backgroundColor;
                     if (cell.backgroundPulse) {
                         transparency = this.cycleVal;
                     }
                 } else if (cell.afterglowCounter !== null) {
-                    backgroundColor = cell.afterglowColor;
+                    color = cell.afterglowColor;
                     transparency = Math.ceil(cell.afterglowCounter * .5);
                     cell.afterglowCounter -= 5;
                     if (cell.afterglowCounter <= 0) {
                         cell.afterglowCounter = null;
                     }
                 }
-                c.fillStyle = backgroundColor + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
+                c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.fill();
 
+                color = this.borderColor;
+                transparency = null;
+                if (cell.borderColor !== null) {
+                    color = cell.borderColor;
+                    if (cell.borderPulse) {
+                        transparency = this.cycleVal;
+                    }
+                }
+                c.strokeStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.lineWidth = this.borderWidth;
-                c.strokeStyle = this.borderColor;   // this.debugColors[((col + 1) * (row + 1)) % this.debugColors.length]
                 c.stroke();
             }
         }
@@ -261,14 +272,32 @@ export class Writer {
         }
     }
 
-    testAction() {
+    testBackground() {
         const cursor = this.cursor;
         const col = cursor.col;
         const row = cursor.row;
         const cell = this.getCell(col, row);
 
         cursor.cell.backgroundColor = this.debugColors[(row * this.cols + col) % this.debugColors.length];
+        cursor.cell.backgroundPulse = true;
+
         cell.backgroundColor = cursor.cell.backgroundColor;
+        cell.backgroundPulse = cursor.cell.backgroundPulse;
+
+        this.cursorRight();
+    }
+
+    testBorder() {
+        const cursor = this.cursor;
+        const col = cursor.col;
+        const row = cursor.row;
+        const cell = this.getCell(col, row);
+
+        cursor.cell.borderColor = this.debugColors[(row * this.cols + col) % this.debugColors.length];
+        cursor.cell.borderPulse = true;
+
+        cell.borderColor = cursor.cell.borderColor;
+        cell.borderPulse = cursor.cell.borderPulse;
 
         this.cursorRight();
     }

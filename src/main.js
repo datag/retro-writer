@@ -27,7 +27,10 @@ window.addEventListener('keydown', (event) => {
             writer.cursorRight();
             break;
         case ' ':
-            writer.testAction();
+            writer.testBackground();
+            break;
+        case 'b':
+            writer.testBorder();
             break;
     }
 });
