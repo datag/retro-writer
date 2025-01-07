@@ -8,7 +8,10 @@ const writer = new Writer(
 );
 writer.mainLoop();
 
-/** @type {('foreground'|'background'|'border')} The current target for color selection */
+/** @type {('cursor'|'global')} The current scope for applying color/pulse */
+let colorScope = 'cursor';
+
+/** @type {('foreground'|'background'|'border')} The current target for applying color/pulse */
 let colorTarget = 'background';
 
 /** @type {boolean} Whether character input automatically advances cursor */
@@ -20,7 +23,7 @@ window.addEventListener('keydown', (event) => {
     switch (true) {
         case event.ctrlKey && event.key >= '0' && event.key <= '9':
             const color = Writer.debugColors[(Number(event.key) + 9) % Writer.debugColors.length];
-            writer.setCursorColor(colorTarget, color);
+            writer.setColor(colorScope, colorTarget, color);
             break;
         case event.key === 'ArrowUp':
             writer.cursorUp();
@@ -38,27 +41,30 @@ window.addEventListener('keydown', (event) => {
             if (!event.shiftKey) {
                 colorTarget = 'foreground';
             } else {
-                writer.setCursorColor('foreground', null);
+                writer.setColor(colorScope, 'foreground', null);
             }
             break;
         case event.key === 'F3':
             if (!event.shiftKey) {
                 colorTarget = 'background';
             } else {
-                writer.setCursorColor('background', null);
+                writer.setColor(colorScope, 'background', null);
             }
             break;
         case event.key === 'F4':
             if (!event.shiftKey) {
                 colorTarget = 'border';
             } else {
-                writer.setCursorColor('border', null);
+                writer.setColor(colorScope, 'border', null);
             }
             break;
         case event.key === 'F6':
             const enable = !event.shiftKey;
-            writer.setCursorPulse(colorTarget, enable);
+            writer.setPulse(colorScope, colorTarget, enable);
             break;
+        case event.key === 'F7':
+            colorScope = event.shiftKey ? 'global' : 'cursor';
+            break
         case event.key === 'F10':
             autoAdvance = !event.shiftKey;
             break;
@@ -95,6 +101,7 @@ window.addEventListener('keydown', (event) => {
         'F3           Select background   (SHIFT clears)',
         'F4           Select border       (SHIFT clears)',
         'F6           Enable pulsating    (SHIFT disables)',
+        'F7           Select scope cursor (SHIFT select global)',
         'F10          Enable auto advance (SHIFT disabled)',
         'CTRL + 0-9   Select color from palette',
         'Cursor       Move around',

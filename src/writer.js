@@ -87,8 +87,10 @@ export class Writer {
         /** @type {number} Speed between 0 and 1 */
         this.speed = .5;
 
-        this.backgroundColor = '#111111';
-        this.borderColor = '#222222';
+        /** @type {Cell} */
+        this.globalStyle = new Cell();
+        this.globalStyle.backgroundColor = '#111111';
+        this.globalStyle.borderColor = '#222222';
         this.borderWidth = 2;
 
         /** @type {Cursor} */
@@ -191,13 +193,17 @@ export class Writer {
                     this.cellWidth - this.borderWidth, this.cellHeight - this.borderWidth
                 );
 
-                let color = this.backgroundColor;
+                let color = this.globalStyle.backgroundColor;
                 let transparency = null;
                 if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
                     if (cell.backgroundPulse) {
                         transparency = this.cycleVal;
                     }
+                } else if (this.globalStyle.backgroundPulse) {
+                    transparency = this.cycleVal;
+
+                    cell.afterglowCounter = null;       // reset any afterglow
                 } else if (cell.afterglowCounter !== null) {
                     color = cell.afterglowColor;
                     transparency = Math.ceil(cell.afterglowCounter * .5);
@@ -210,13 +216,15 @@ export class Writer {
                 c.fill();
 
                 // Border
-                color = this.borderColor;
+                color = this.globalStyle.borderColor;
                 transparency = null;
                 if (cell.borderColor !== null) {
                     color = cell.borderColor;
                     if (cell.borderPulse) {
                         transparency = this.cycleVal;
                     }
+                } else if (this.globalStyle.borderPulse) {
+                    transparency = this.cycleVal;
                 }
                 c.strokeStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.lineWidth = this.borderWidth;
@@ -225,9 +233,14 @@ export class Writer {
                 // Character
                 if (cell.character !== null) {
                     const fontSize = this.cellHeight * .6;
-                    color = cell.foregroundColor;
+                    color = this.globalStyle.foregroundColor;
                     transparency = null;
-                    if (cell.foregroundPulse) {
+                    if (cell.foregroundColor !== null) {
+                        color = cell.foregroundColor;
+                        if (cell.foregroundPulse) {
+                            transparency = this.cycleVal;
+                        }
+                    } else if (this.globalStyle.foregroundPulse) {
                         transparency = this.cycleVal;
                     }
                     c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
@@ -378,38 +391,38 @@ export class Writer {
     }
 
     /**
-     *
+     * @param {('cursor'|'global')} scope
      * @param {('foreground'|'background'|'border')} target
      * @param {?string} color
      */
-    setCursorColor(target, color) {
-        const cursor = this.cursor;
+    setColor(scope, target, color) {
+        const cell = scope === 'cursor' ? this.cursor.cell : this.globalStyle;
 
         if (target === 'foreground') {
-            cursor.cell.foregroundColor = color;
+            cell.foregroundColor = color;
         } else if (target === 'background') {
-            cursor.cell.backgroundColor = color;
+            cell.backgroundColor = color;
         } else if (target === 'border') {
-            cursor.cell.borderColor = color;
+            cell.borderColor = color;
         } else {
             console.error(`Target '${target}' not implemented`);
         }
     }
 
     /**
-     *
+     * @param {('cursor'|'global')} scope
      * @param {('foreground'|'background'|'border')} target
      * @param {boolean} enabled
      */
-    setCursorPulse(target, enabled) {
-        const cursor = this.cursor;
+    setPulse(scope, target, enabled) {
+        const cell = scope === 'cursor' ? this.cursor.cell : this.globalStyle;
 
         if (target === 'foreground') {
-            cursor.cell.foregroundPulse = enabled;
+            cell.foregroundPulse = enabled;
         } else if (target === 'background') {
-            cursor.cell.backgroundPulse = enabled;
+            cell.backgroundPulse = enabled;
         } else if (target === 'border') {
-            cursor.cell.borderPulse = enabled;
+            cell.borderPulse = enabled;
         } else {
             console.error(`Target '${target}' not implemented`);
         }
