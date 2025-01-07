@@ -8,7 +8,6 @@ const writer = new Writer(
 );
 writer.mainLoop();
 
-
 /** @type {('foreground'|'background'|'border')} The current target for color selection */
 let colorTarget = 'background';
 
@@ -17,17 +16,8 @@ window.addEventListener('keydown', (event) => {
 
     switch (true) {
         case event.ctrlKey && event.key >= '0' && event.key <= '9':
-            event.preventDefault();
             const color = Writer.debugColors[(Number(event.key) + 9) % Writer.debugColors.length];
-            if (colorTarget === 'foreground') {
-                writer.cursor.cell.foregroundColor = color;
-            } else if (colorTarget === 'background') {
-                writer.cursor.cell.backgroundColor = color;
-            } else if (colorTarget === 'border') {
-                writer.cursor.cell.borderColor = color;
-            } else {
-                console.error(`Unhandled color target '${colorTarget}'`);
-            }
+            writer.setCursorColor(colorTarget, color);
             break;
         case event.key === 'ArrowUp':
             writer.cursorUp();
@@ -45,34 +35,26 @@ window.addEventListener('keydown', (event) => {
             if (!event.shiftKey) {
                 colorTarget = 'foreground';
             } else {
-                writer.cursor.cell.foregroundColor = null;
+                writer.setCursorColor('foreground', null);
             }
             break;
         case event.key === 'F3':
             if (!event.shiftKey) {
                 colorTarget = 'background';
             } else {
-                writer.cursor.cell.backgroundColor = null;
+                writer.setCursorColor('background', null);
             }
             break;
         case event.key === 'F4':
             if (!event.shiftKey) {
                 colorTarget = 'border';
             } else {
-                writer.cursor.cell.borderColor = null;
+                writer.setCursorColor('border', null);
             }
             break;
         case event.key === 'F6':
             const enable = !event.shiftKey;
-            if (colorTarget === 'foreground') {
-                writer.cursor.cell.foregroundPulse = enable;
-            } else if (colorTarget === 'background') {
-                writer.cursor.cell.backgroundPulse = enable;
-            } else if (colorTarget === 'border') {
-                writer.cursor.cell.borderPulse = enable;
-            } else {
-                console.error(`Unhandled color target '${colorTarget}'`);
-            }
+            writer.setCursorPulse(colorTarget, enable);
             break;
         case event.key === 'Delete':
             writer.clearCell();

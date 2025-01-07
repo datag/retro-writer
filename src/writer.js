@@ -9,7 +9,7 @@ class Cell {
         this.borderColor = null;
         this.borderPulse = false;
 
-        this.afterglowColor = null;
+        this.afterglowColor = null;     // TODO: Change to CellStyle and also handle border in afterglow
         this.afterglowCounter = null;
 
         this.character = null;
@@ -269,7 +269,7 @@ export class Writer {
             return;
         }
 
-        this.triggerAfterglow();
+        this.#triggerAfterglow();
         this.cursor.row--;
     }
 
@@ -280,12 +280,12 @@ export class Writer {
             return;
         }
 
-        this.triggerAfterglow();
+        this.#triggerAfterglow();
         this.cursor.row++;
     }
 
     cursorLeft() {
-        this.triggerAfterglow();
+        this.#triggerAfterglow();
         if (this.cursor.col === 0) {
             this.cursor.col = this.cols - 1;
         } else {
@@ -294,7 +294,7 @@ export class Writer {
     }
 
     cursorRight() {
-        this.triggerAfterglow();
+        this.#triggerAfterglow();
         if (this.cursor.col === this.cols - 1) {
             this.cursor.col = 0;
         } else {
@@ -307,7 +307,7 @@ export class Writer {
 
         if (cursor.col === this.cols - 1) {
             if (cursor.row !== this.rows - 1) {
-                this.triggerAfterglow();
+                this.#triggerAfterglow();
                 cursor.col = 0;
                 cursor.row++;
             } else {
@@ -316,7 +316,7 @@ export class Writer {
                 return false;
             }
         } else {
-            this.triggerAfterglow();
+            this.#triggerAfterglow();
             cursor.col++;
         }
 
@@ -328,14 +328,14 @@ export class Writer {
 
         if (cursor.col === 0) {
             if (cursor.row !== 0) {
-                this.triggerAfterglow();
+                this.#triggerAfterglow();
                 cursor.col = this.cols - 1;
                 cursor.row--;
             } else {
                 return false;
             }
         } else {
-            this.triggerAfterglow();
+            this.#triggerAfterglow();
             cursor.col--;
         }
 
@@ -366,7 +366,7 @@ export class Writer {
         this.cells[cursor.row * this.cols + cursor.col] = new Cell();
     }
 
-    triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
+    #triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
         const cell = this.getCell(col, row);
 
         if (color === null) {
@@ -375,5 +375,43 @@ export class Writer {
 
         cell.afterglowColor = color;
         cell.afterglowCounter = this.cycleVal;
+    }
+
+    /**
+     *
+     * @param {('foreground'|'background'|'border')} target
+     * @param {?string} color
+     */
+    setCursorColor(target, color) {
+        const cursor = this.cursor;
+
+        if (target === 'foreground') {
+            cursor.cell.foregroundColor = color;
+        } else if (target === 'background') {
+            cursor.cell.backgroundColor = color;
+        } else if (target === 'border') {
+            cursor.cell.borderColor = color;
+        } else {
+            console.error(`Target '${target}' not implemented`);
+        }
+    }
+
+    /**
+     *
+     * @param {('foreground'|'background'|'border')} target
+     * @param {boolean} enabled
+     */
+    setCursorPulse(target, enabled) {
+        const cursor = this.cursor;
+
+        if (target === 'foreground') {
+            cursor.cell.foregroundPulse = enabled;
+        } else if (target === 'background') {
+            cursor.cell.backgroundPulse = enabled;
+        } else if (target === 'border') {
+            cursor.cell.borderPulse = enabled;
+        } else {
+            console.error(`Target '${target}' not implemented`);
+        }
     }
 }
