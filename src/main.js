@@ -11,6 +11,9 @@ writer.mainLoop();
 /** @type {('foreground'|'background'|'border')} The current target for color selection */
 let colorTarget = 'background';
 
+/** @type {boolean} Whether character input automatically advances cursor */
+let autoAdvance = true;
+
 window.addEventListener('keydown', (event) => {
     let handled = true;
 
@@ -56,6 +59,9 @@ window.addEventListener('keydown', (event) => {
             const enable = !event.shiftKey;
             writer.setCursorPulse(colorTarget, enable);
             break;
+        case event.key === 'F10':
+            autoAdvance = !event.shiftKey;
+            break;
         case event.key === 'Delete':
             writer.clearCell();
             break;
@@ -66,7 +72,9 @@ window.addEventListener('keydown', (event) => {
             break;
         case event.key.length == 1:
             writer.character(event.key);
-            writer.advance();
+            if (autoAdvance) {
+                writer.advance();
+            }
             break;
         default:
             handled = false;
@@ -87,6 +95,7 @@ window.addEventListener('keydown', (event) => {
         'F3           Select background   (SHIFT clears)',
         'F4           Select border       (SHIFT clears)',
         'F6           Enable pulsating    (SHIFT disables)',
+        'F10          Enable auto advance (SHIFT disabled)',
         'CTRL + 0-9   Select color from palette',
         'Cursor       Move around',
         'Delete       Clear cell under cursor',
