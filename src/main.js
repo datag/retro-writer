@@ -9,13 +9,15 @@ const writer = new Writer(
 writer.mainLoop();
 
 
-/** @type {('foreground'|'background'|'border')} The correct target for color selection */
+/** @type {('foreground'|'background'|'border')} The current target for color selection */
 let colorTarget = 'background';
 
 window.addEventListener('keydown', (event) => {
+    let notHandled = false;
+
     switch (true) {
-        // FIXME: Don't use 0-9...
-        case event.key >= '0' && event.key <= '9':
+        case event.ctrlKey && event.key >= '0' && event.key <= '9':
+            event.preventDefault();
             const color = Writer.debugColors[(Number(event.key) + 9) % Writer.debugColors.length];
             if (colorTarget === 'foreground') {
                 writer.cursor.cell.foregroundColor = color;
@@ -40,7 +42,6 @@ window.addEventListener('keydown', (event) => {
             writer.cursorRight();
             break;
         case event.key === 'F2':
-            event.preventDefault();
             if (!event.shiftKey) {
                 colorTarget = 'foreground';
             } else {
@@ -48,7 +49,6 @@ window.addEventListener('keydown', (event) => {
             }
             break;
         case event.key === 'F3':
-            event.preventDefault();
             if (!event.shiftKey) {
                 colorTarget = 'background';
             } else {
@@ -56,7 +56,6 @@ window.addEventListener('keydown', (event) => {
             }
             break;
         case event.key === 'F4':
-            event.preventDefault();
             if (!event.shiftKey) {
                 colorTarget = 'border';
             } else {
@@ -64,7 +63,6 @@ window.addEventListener('keydown', (event) => {
             }
             break;
         case event.key === 'F6':
-            event.preventDefault();
             const enable = !event.shiftKey;
             if (colorTarget === 'foreground') {
                 writer.cursor.cell.foregroundPulse = enable;
@@ -86,20 +84,28 @@ window.addEventListener('keydown', (event) => {
             writer.character(event.key, true);
             break;
         default:
+            notHandled = true;
             console.log(`Key:'${event.key}' Shift:${event.shiftKey ? 'yes' : 'no'} Ctrl:${event.ctrlKey ? 'yes' : 'no'} Alt:${event.altKey ? 'yes' : 'no'}`);
             break;
+    }
+
+    // Omit browser default behavior in case we handled the key
+    if (notHandled === false) {
+        event.preventDefault();
     }
 });
 
 (function () {
     const help = [
         'Help:',
-        'F2         Select foreground   (SHIFT clears)',
-        'F3         Select background   (SHIFT clears)',
-        'F4         Select border       (SHIFT clears)',
-        'F6         Enable pulsating    (SHIFT disables)',
-        '0-9        Select color from palette',
-        'Cursor     Move around',
+        'F2           Select foreground   (SHIFT clears)',
+        'F3           Select background   (SHIFT clears)',
+        'F4           Select border       (SHIFT clears)',
+        'F6           Enable pulsating    (SHIFT disables)',
+        'CTRL + 0-9   Select color from palette',
+        'Cursor       Move around',
+        'Delete       Clear cell under cursor',
+        'Backspace    Retract cursor and clear cell under cursor',
     ];
 
     help.forEach((line) => console.info(line));
