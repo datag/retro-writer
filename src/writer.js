@@ -29,6 +29,51 @@ class Cursor {
     }
 }
 
+class Instruction {
+    static CursorUp       = 'CUP';
+    static CursorDown     = 'CDW';
+    static CursorLeft     = 'CLF';
+    static CursorRight    = 'CRT';
+    static Scroll         = 'SCR';
+    static Advance        = 'ADV';
+    static Retract        = 'RCT';
+    static Character      = 'CHR';
+    static ClearCell      = 'CLR';
+
+    static CellForegroundColor = 'CFC';
+    static CellBackgroundColor = 'CBC';
+    static CellBorderColor = 'CDC';
+    static CellForegroundPulse = 'CFP';
+    static CellBackgroundPulse = 'CBP';
+    static CellBorderPulse = 'CDP';
+
+    static GlobalForegroundColor = 'GFC';
+    static GlobalBackgroundColor = 'GBC';
+    static GlobalBorderColor = 'GDC';
+    static GlobalForegroundPulse = 'GFP';
+    static GlobalBackgroundPulse = 'GBP';
+    static GlobalBorderPulse = 'GDP';
+
+    constructor(mnemonic, argument1 = null, argument2 = null) {
+        this.mnemonic = mnemonic;
+        this.argument1 = argument1;
+        this.argument2 = argument2;
+    }
+}
+
+class Demo {
+    constructor() {
+        this.version = '0.1.0';     // TODO: Use VITE variable with version from package.json
+
+        /** @type {Instruction[]} */
+        this.recording = [];
+    }
+
+    addInstruction(instruction) {
+        this.recording.push(instruction);
+    }
+}
+
 export class Writer {
     constructor(canvas, width, height, cols = 40, rows = 25) {
         /** @type {HTMLCanvasElement} */
@@ -45,6 +90,9 @@ export class Writer {
 
         /** @type {number} */
         this.rows = rows;
+
+        /** @type {Demo} */
+        this.demo = new Demo();
 
         this.init();
     }
@@ -297,7 +345,25 @@ export class Writer {
         c.stroke();
     }
 
+    #triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor, counter = this.cycleVal) {
+        const cell = this.getCell(col, row);
+
+        if (color === null) {
+            color = '#eeeeee';
+        }
+
+        cell.afterglowColor = color;
+        cell.afterglowCounter = counter;
+    }
+
+    #record(instruction) {
+        // TODO: Return early if we're currently in playback state
+        this.demo.addInstruction(instruction);
+    }
+
     scroll() {
+        this.#record(new Instruction(Instruction.Scroll));
+
         // Remove first row
         this.cells.splice(0, this.cols);
 
@@ -322,6 +388,8 @@ export class Writer {
     }
 
     cursorUp() {
+        this.#record(new Instruction(Instruction.CursorUp));
+
         if (this.cursor.row === 0) {
             return;
         }
@@ -331,6 +399,8 @@ export class Writer {
     }
 
     cursorDown() {
+        this.#record(new Instruction(Instruction.CursorDown));
+
         if (this.cursor.row === this.rows - 1) {
             this.scroll();
             return;
@@ -341,6 +411,8 @@ export class Writer {
     }
 
     cursorLeft() {
+        this.#record(new Instruction(Instruction.CursorLeft));
+
         this.#triggerAfterglow();
         if (this.cursor.col === 0) {
             this.cursor.col = this.cols - 1;
@@ -350,6 +422,8 @@ export class Writer {
     }
 
     cursorRight() {
+        this.#record(new Instruction(Instruction.CursorRight));
+
         this.#triggerAfterglow();
         if (this.cursor.col === this.cols - 1) {
             this.cursor.col = 0;
@@ -359,6 +433,8 @@ export class Writer {
     }
 
     advance() {
+        this.#record(new Instruction(Instruction.Advance));
+
         const cursor = this.cursor;
 
         if (cursor.col === this.cols - 1) {
@@ -377,6 +453,8 @@ export class Writer {
     }
 
     retract() {
+        this.#record(new Instruction(Instruction.Retract));
+
         const cursor = this.cursor;
 
         if (cursor.col === 0) {
@@ -396,6 +474,8 @@ export class Writer {
     }
 
     character(character) {
+        this.#record(new Instruction(Instruction.Character, character));
+
         const cursor = this.cursor;
         const col = cursor.col;
         const row = cursor.row;
@@ -414,20 +494,11 @@ export class Writer {
     }
 
     clearCell() {
+        this.#record(new Instruction(Instruction.ClearCell));
+
         const cursor = this.cursor;
 
         this.cells[cursor.row * this.cols + cursor.col] = new Cell();
-    }
-
-    #triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor, counter = this.cycleVal) {
-        const cell = this.getCell(col, row);
-
-        if (color === null) {
-            color = '#eeeeee';
-        }
-
-        cell.afterglowColor = color;
-        cell.afterglowCounter = counter;
     }
 
     /**
@@ -443,15 +514,28 @@ export class Writer {
             return;
         }
 
+        let mnemonic = null;
+
         if (target === 'foreground') {
             cell.foregroundColor = color;
+            mnemonic = Instruction.CellForegroundColor;
         } else if (target === 'background') {
             cell.backgroundColor = color;
+            mnemonic = Instruction.CellBackgroundColor;
         } else if (target === 'border') {
             cell.borderColor = color;
+            mnemonic = Instruction.CellBorderColor;
         } else {
             console.error(`Target '${target}' not implemented`);
+            return;
         }
+
+        if (scope === 'global') {
+            // Replace first character 'C' (cell) with 'G' (global)
+            mnemonic = 'G' + mnemonic.slice(1);
+        }
+
+        this.#record(new Instruction(mnemonic, color));
     }
 
     /**
@@ -462,14 +546,26 @@ export class Writer {
     setPulse(scope, target, enabled) {
         const cell = scope === 'cursor' ? this.cursor.cell : this.globalStyle;
 
+        let mnemonic = null;
+
         if (target === 'foreground') {
             cell.foregroundPulse = enabled;
+            mnemonic = Instruction.CellForegroundPulse;
         } else if (target === 'background') {
             cell.backgroundPulse = enabled;
+            mnemonic = Instruction.CellBackgroundPulse;
         } else if (target === 'border') {
             cell.borderPulse = enabled;
+            mnemonic = Instruction.CellBorderPulse;
         } else {
             console.error(`Target '${target}' not implemented`);
         }
+
+        if (scope === 'global') {
+            // Replace first character 'C' (cell) with 'G' (global)
+            mnemonic = 'G' + mnemonic.slice(1);
+        }
+
+        this.#record(new Instruction(mnemonic, color));
     }
 }
