@@ -40,12 +40,12 @@ class Instruction {
     static Character      = 'CHR';
     static ClearCell      = 'CLR';
 
-    static CellForegroundColor = 'CFC';
-    static CellBackgroundColor = 'CBC';
-    static CellBorderColor = 'CDC';
-    static CellForegroundPulse = 'CFP';
-    static CellBackgroundPulse = 'CBP';
-    static CellBorderPulse = 'CDP';
+    static CursorForegroundColor = 'CFC';
+    static CursorBackgroundColor = 'CBC';
+    static CursorBorderColor = 'CDC';
+    static CursorForegroundPulse = 'CFP';
+    static CursorBackgroundPulse = 'CBP';
+    static CursorBorderPulse = 'CDP';
 
     static GlobalForegroundColor = 'GFC';
     static GlobalBackgroundColor = 'GBC';
@@ -66,11 +66,43 @@ class Demo {
         this.version = '0.1.0';     // TODO: Use VITE variable with version from package.json
 
         /** @type {Instruction[]} */
-        this.recording = [];
+        this.instructions = [];
+
+        /** @type {?number} */
+        this.instructionIndex = null;
     }
 
     addInstruction(instruction) {
-        this.recording.push(instruction);
+        this.instructions.push(instruction);
+    }
+
+    resetInstructionIndex() {
+        this.instructionIndex = 0;
+    }
+
+    nextInstruction() {
+        const count = this.instructions.length;
+        const index = this.instructionIndex;
+
+        if (count == 0 || index === null) {
+            return null;
+        }
+
+        const instruction = this.instructions[index];
+
+        if (index < count - 1) {
+            this.instructionIndex++;
+        } else {
+            this.instructionIndex = null;
+        }
+
+        console.log({
+            idx: index,
+            instr: instruction,
+            idxAfter: this.instructionIndex,
+        });
+
+        return instruction;
     }
 }
 
@@ -150,6 +182,13 @@ export class Writer {
 
         this.cellWidth = (this.canvas.width - this.borderWidth * 2) / this.cols;
         this.cellHeight = (this.canvas.height - this.borderWidth * 2) / this.rows;
+
+        // FIXME: Introduce state machine: Menu, Record, Playback, ...
+        /** @type {boolean} */
+        this.playback = false;
+
+        /** @type {number} Timestamp of last playback instruction */
+        this.playbackLastTimestamp = 0;
     }
 
     mainLoop(timestamp) {
@@ -164,6 +203,13 @@ export class Writer {
         requestAnimationFrame(this.mainLoop.bind(this));
     }
 
+    play() {
+        this.init();
+        this.playback = true;
+        this.playbackLastTimestamp = 0;
+        this.demo.resetInstructionIndex();
+    }
+
     getCell(col, row) {
         return this.cells[row * this.cols + col];
     }
@@ -176,6 +222,22 @@ export class Writer {
     }
 
     #update(timestamp) {
+        if (this.playback) {
+            const msPlaybackWait = 250 * (1 - this.speed);
+
+            if (timestamp - this.playbackLastTimestamp > msPlaybackWait) {
+                const instruction = this.demo.nextInstruction();
+                if (instruction !== null) {
+                    this.#executeInstruction(instruction);
+
+                    this.playbackLastTimestamp = timestamp;
+                } else {
+                    this.playback = false;
+                    console.info('Plackback stopped');
+                }
+            }
+        }
+
         // Cycle
         const msCycleWait = 50 * (1 - this.speed);
 
@@ -357,8 +419,61 @@ export class Writer {
     }
 
     #record(instruction) {
-        // TODO: Return early if we're currently in playback state
-        this.demo.addInstruction(instruction);
+        if (!this.playback) {
+            this.demo.addInstruction(instruction);
+        }
+    }
+
+    #executeInstruction(instruction) {
+        const m = instruction.mnemonic;
+        const a1 = instruction.argument1;
+        const a2 = instruction.argument2;
+
+        if (m === Instruction.Scroll) {
+            this.scroll();
+        } else if (m === Instruction.CursorUp) {
+            this.cursorUp();
+        } else if (m === Instruction.CursorDown) {
+            this.cursorDown();
+        } else if (m === Instruction.CursorLeft) {
+            this.cursorLeft();
+        } else if (m === Instruction.CursorRight) {
+            this.cursorRight();
+        } else if (m === Instruction.Advance) {
+            this.advance();
+        } else if (m === Instruction.Retract) {
+            this.retract();
+        } else if (m === Instruction.Character) {
+            this.character(a1);
+        } else if (m === Instruction.ClearCell) {
+            this.clearCell();
+        } else if (m === Instruction.CursorForegroundColor) {
+            this.setColor('cursor', 'foreground', a1);
+        } else if (m === Instruction.CursorBackgroundColor) {
+            this.setColor('cursor', 'background', a1);
+        } else if (m === Instruction.CursorBorderColor) {
+            this.setColor('cursor', 'border', a1);
+        } else if (m === Instruction.GlobalForegroundColor) {
+            this.setColor('global', 'foreground', a1);
+        } else if (m === Instruction.GlobalBackgroundColor) {
+            this.setColor('global', 'background', a1);
+        } else if (m === Instruction.GlobalBorderColor) {
+            this.setColor('global', 'border', a1);
+        } else if (m === Instruction.CursorForegroundPulse) {
+            this.setPulse('cursor', 'foreground', a1);
+        } else if (m === Instruction.CursorBackgroundPulse) {
+            this.setPulse('cursor', 'background', a1);
+        } else if (m === Instruction.CursorBorderPulse) {
+            this.setPulse('cursor', 'border', a1);
+        } else if (m === Instruction.GlobalForegroundPulse) {
+            this.setPulse('global', 'foreground', a1);
+        } else if (m === Instruction.GlobalBackgroundPulse) {
+            this.setPulse('global', 'background', a1);
+        } else if (m === Instruction.GlobalBorderPulse) {
+            this.setPulse('global', 'border', a1);
+        } else {
+            console.warn(`Instruction with mnemonic ${m} not handled`);
+        }
     }
 
     scroll() {
@@ -518,13 +633,13 @@ export class Writer {
 
         if (target === 'foreground') {
             cell.foregroundColor = color;
-            mnemonic = Instruction.CellForegroundColor;
+            mnemonic = Instruction.CursorForegroundColor;
         } else if (target === 'background') {
             cell.backgroundColor = color;
-            mnemonic = Instruction.CellBackgroundColor;
+            mnemonic = Instruction.CursorBackgroundColor;
         } else if (target === 'border') {
             cell.borderColor = color;
-            mnemonic = Instruction.CellBorderColor;
+            mnemonic = Instruction.CursorBorderColor;
         } else {
             console.error(`Target '${target}' not implemented`);
             return;
@@ -550,15 +665,16 @@ export class Writer {
 
         if (target === 'foreground') {
             cell.foregroundPulse = enabled;
-            mnemonic = Instruction.CellForegroundPulse;
+            mnemonic = Instruction.CursorForegroundPulse;
         } else if (target === 'background') {
             cell.backgroundPulse = enabled;
-            mnemonic = Instruction.CellBackgroundPulse;
+            mnemonic = Instruction.CursorBackgroundPulse;
         } else if (target === 'border') {
             cell.borderPulse = enabled;
-            mnemonic = Instruction.CellBorderPulse;
+            mnemonic = Instruction.CursorBorderPulse;
         } else {
             console.error(`Target '${target}' not implemented`);
+            return;
         }
 
         if (scope === 'global') {
@@ -566,6 +682,6 @@ export class Writer {
             mnemonic = 'G' + mnemonic.slice(1);
         }
 
-        this.#record(new Instruction(mnemonic, color));
+        this.#record(new Instruction(mnemonic, enabled));
     }
 }

@@ -65,8 +65,11 @@ window.addEventListener('keydown', (event) => {
         case event.key === 'F7':
             colorScope = event.shiftKey ? 'global' : 'cursor';
             break
-        case event.key === 'F10':
+        case event.key === 'F9':
             autoAdvance = !event.shiftKey;
+            break;
+        case event.key === 'F10':
+            writer.play();
             break;
         case event.key === 'Delete':
             writer.clearCell();
@@ -105,7 +108,8 @@ window.addEventListener('keydown', (event) => {
         'F4           Select border       (SHIFT clears)',
         'F6           Enable pulsating    (SHIFT disables)',
         'F7           Select scope cursor (SHIFT select global)',
-        'F10          Enable auto advance (SHIFT disabled)',
+        'F9           Enable auto advance (SHIFT disabled)',
+        'F10          Playback',
         'CTRL + 0-9   Select color from palette',
         'Cursor       Move around',
         'Delete       Clear cell under cursor',
