@@ -96,12 +96,6 @@ class Demo {
             this.instructionIndex = null;
         }
 
-        console.log({
-            idx: index,
-            instr: instruction,
-            idxAfter: this.instructionIndex,
-        });
-
         return instruction;
     }
 }
@@ -223,14 +217,17 @@ export class Writer {
 
     #update(timestamp) {
         if (this.playback) {
-            const msPlaybackWait = 250 * (1 - this.speed);
+            const msPlaybackWait = 100 * (1 - this.speed);
 
             if (timestamp - this.playbackLastTimestamp > msPlaybackWait) {
                 const instruction = this.demo.nextInstruction();
                 if (instruction !== null) {
-                    this.#executeInstruction(instruction);
+                    const delay = this.#executeInstruction(instruction);
 
                     this.playbackLastTimestamp = timestamp;
+                    if (!delay) {
+                        this.playbackLastTimestamp = 0;
+                    }
                 } else {
                     this.playback = false;
                     console.info('Plackback stopped');
@@ -429,6 +426,8 @@ export class Writer {
         const a1 = instruction.argument1;
         const a2 = instruction.argument2;
 
+        let delay = true;
+
         if (m === Instruction.Scroll) {
             this.scroll();
         } else if (m === Instruction.CursorUp) {
@@ -445,6 +444,7 @@ export class Writer {
             this.retract();
         } else if (m === Instruction.Character) {
             this.character(a1);
+            delay = false;
         } else if (m === Instruction.ClearCell) {
             this.clearCell();
         } else if (m === Instruction.CursorForegroundColor) {
@@ -473,7 +473,10 @@ export class Writer {
             this.setPulse('global', 'border', a1);
         } else {
             console.warn(`Instruction with mnemonic ${m} not handled`);
+            delay = false;
         }
+
+        return delay;
     }
 
     scroll() {
