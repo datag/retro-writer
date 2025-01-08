@@ -297,6 +297,18 @@ export class Writer {
         c.stroke();
     }
 
+    scroll() {
+        // Remove first row
+        this.cells.splice(0, this.cols);
+
+        // Insert empty new row
+        for (let i = 0; i < this.cols; i++) {
+            this.cells.push(new Cell());
+        }
+
+        // TODO: afterglow?
+    }
+
     cursorUp() {
         if (this.cursor.row === 0) {
             return;
@@ -307,9 +319,8 @@ export class Writer {
     }
 
     cursorDown() {
-        // TODO: Scroll
         if (this.cursor.row === this.rows - 1) {
-            console.warn('TODO: Implement scrolling');
+            this.scroll();
             return;
         }
 
@@ -344,16 +355,13 @@ export class Writer {
                 cursor.col = 0;
                 cursor.row++;
             } else {
-                // TODO: Scroll
-                console.warn('TODO: Implement scrolling');
-                return false;
+                this.scroll();
+                cursor.col = 0;
             }
         } else {
             this.#triggerAfterglow();
             cursor.col++;
         }
-
-        return true;
     }
 
     retract() {

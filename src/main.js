@@ -76,6 +76,9 @@ window.addEventListener('keydown', (event) => {
                 writer.clearCell();
             }
             break;
+        case event.key === 'PageDown':
+            writer.scroll();
+            break;
         case event.key.length == 1:
             writer.character(event.key);
             if (autoAdvance) {
@@ -107,6 +110,7 @@ window.addEventListener('keydown', (event) => {
         'Cursor       Move around',
         'Delete       Clear cell under cursor',
         'Backspace    Retract cursor and clear cell under cursor',
+        'PageDown     Scroll without moving cursor',
     ];
 
     help.forEach((line) => console.info(line));
