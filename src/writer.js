@@ -75,7 +75,7 @@ export class Writer {
             this.cells.push(new Cell());
         }
 
-        /** @type {number} Cycle value between 0 and 255 */
+        /** @type {number} Timestamp of last cycle */
         this.cycleLastTimestamp = 0;
 
         /** @type {number} Cycle value between 0 and 255 */
@@ -83,6 +83,9 @@ export class Writer {
 
         /** @type {bool} Cycle direction (up=true, down=false) */
         this.cycleUp = true;
+
+        /** @type {number} Timestamp of last afterflow decrement */
+        this.afterglowLastTimestamp = 0;
 
         /** @type {number} Speed between 0 and 1 */
         this.speed = .5;
@@ -125,6 +128,7 @@ export class Writer {
     }
 
     #update(timestamp) {
+        // Cycle
         const msCycleWait = 50 * (1 - this.speed);
 
         if (timestamp - this.cycleLastTimestamp > msCycleWait) {
@@ -144,6 +148,28 @@ export class Writer {
             }
 
             this.cycleLastTimestamp = timestamp;
+        }
+
+        // Afterglow
+        const msAfterglowWait = 5 * (1 - this.speed);
+
+        if (timestamp - this.afterglowLastTimestamp > msAfterglowWait) {
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
+                    const cell = this.getCell(col, row);
+
+                    if (this.globalStyle.backgroundPulse) {
+                        cell.afterglowCounter = null;       // reset any afterglow
+                    } else if (cell.afterglowCounter !== null) {
+                        cell.afterglowCounter -= 5;
+                        if (cell.afterglowCounter <= 0) {
+                            cell.afterglowCounter = null;
+                        }
+                    }
+                }
+            }
+
+            this.afterglowLastTimestamp = timestamp;
         }
     }
 
@@ -202,15 +228,9 @@ export class Writer {
                     }
                 } else if (this.globalStyle.backgroundPulse) {
                     transparency = this.cycleVal;
-
-                    cell.afterglowCounter = null;       // reset any afterglow
                 } else if (cell.afterglowCounter !== null) {
                     color = cell.afterglowColor;
                     transparency = Math.ceil(cell.afterglowCounter * .5);
-                    cell.afterglowCounter -= 5;
-                    if (cell.afterglowCounter <= 0) {
-                        cell.afterglowCounter = null;
-                    }
                 }
                 c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
                 c.fill();
