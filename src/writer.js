@@ -9,7 +9,7 @@ class Cell {
         this.borderColor = null;
         this.borderPulse = false;
 
-        this.afterglowColor = null;     // TODO: Change to CellStyle and also handle border in afterglow
+        this.afterglowColor = null;     // TODO: Change to CellStyle and also handle border and character in afterglow
         this.afterglowCounter = null;
 
         this.character = null;
@@ -306,7 +306,19 @@ export class Writer {
             this.cells.push(new Cell());
         }
 
-        // TODO: afterglow?
+        // Afterglow
+        for (let row = 0; row < this.rows - 1 /* excluding last row */; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                const cell = this.getCell(col, row);
+
+                // TODO: Support afterglow for border and character
+                if (cell.backgroundColor === null) {
+                    continue;
+                }
+
+                this.#triggerAfterglow(col, row + 1, cell.backgroundColor, cell.backgroundPulse ? this.cycleVal : 255);
+            }
+        }
     }
 
     cursorUp() {
@@ -407,7 +419,7 @@ export class Writer {
         this.cells[cursor.row * this.cols + cursor.col] = new Cell();
     }
 
-    #triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor) {
+    #triggerAfterglow(col = this.cursor.col, row = this.cursor.row, color = this.cursor.cell.backgroundColor, counter = this.cycleVal) {
         const cell = this.getCell(col, row);
 
         if (color === null) {
@@ -415,7 +427,7 @@ export class Writer {
         }
 
         cell.afterglowColor = color;
-        cell.afterglowCounter = this.cycleVal;
+        cell.afterglowCounter = counter;
     }
 
     /**
