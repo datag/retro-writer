@@ -63,7 +63,7 @@ class Instruction {
 
 class Demo {
     constructor() {
-        this.version = '0.1.0';     // TODO: Use VITE variable with version from package.json
+        this.version = Writer.AppVersion;
 
         /** @type {Instruction[]} */
         this.instructions = [];
@@ -101,6 +101,8 @@ class Demo {
 }
 
 export class Writer {
+    static AppVersion = import.meta.env.VITE_PACKAGE_VERSION;       // Move to App class
+
     constructor(canvas, width, height, cols = 40, rows = 25) {
         /** @type {HTMLCanvasElement} */
         this.canvas = canvas;
