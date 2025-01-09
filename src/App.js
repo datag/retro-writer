@@ -16,92 +16,79 @@ export default class App {
     /** @type {boolean} Whether character input automatically advances cursor */
     #autoAdvance = true;
 
+    /**
+     * @param {HTMLCanvasElement} canvas
+     */
     constructor(canvas) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
-        window.addEventListener('keydown', this.onKeyDown.bind(this));
+        window.addEventListener('keydown', this.#onKeyDown.bind(this));
     }
 
     start() {
         this.#writer.mainLoop();
     }
 
-    onKeyDown(event) {
+    /** @param {KeyboardEvent} event */
+    #onKeyDown(event) {
         const writer = this.#writer;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+
         let handled = true;
 
-        switch (true) {
-            case event.ctrlKey && event.key >= '0' && event.key <= '9':
-                const color = Writer.debugColors[(Number(event.key) + 9) % Writer.debugColors.length];
-                writer.setColor(this.#colorScope, this.#colorTarget, color);
-                break;
-            case event.key === 'ArrowUp':
-                writer.cursorUp();
-                break;
-            case event.key === 'ArrowDown':
-                writer.cursorDown();
-                break;
-            case event.key === 'ArrowLeft':
-                writer.cursorLeft();
-                break;
-            case event.key === 'ArrowRight':
-                writer.cursorRight();
-                break;
-            case event.key === 'F2':
-                if (!event.shiftKey) {
-                    this.#colorTarget = 'foreground';
-                } else {
-                    writer.setColor(this.#colorScope, 'foreground', null);
-                }
-                break;
-            case event.key === 'F3':
-                if (!event.shiftKey) {
-                    this.#colorTarget = 'background';
-                } else {
-                    writer.setColor(this.#colorScope, 'background', null);
-                }
-                break;
-            case event.key === 'F4':
-                if (!event.shiftKey) {
-                    this.#colorTarget = 'border';
-                } else {
-                    writer.setColor(this.#colorScope, 'border', null);
-                }
-                break;
-            case event.key === 'F6':
-                const enable = !event.shiftKey;
-                writer.setPulse(this.#colorScope, this.#colorTarget, enable);
-                break;
-            case event.key === 'F7':
-                this.#colorScope = event.shiftKey ? 'global' : 'cursor';
-                break
-            case event.key === 'F9':
-                this.#autoAdvance = !event.shiftKey;
-                break;
-            case event.key === 'F10':
-                writer.play();
-                break;
-            case event.key === 'Delete':
+        if (ctrlKey && key >= '0' && key <= '9') {
+            const color = Writer.debugColors[(Number(key) + 9) % Writer.debugColors.length];
+            writer.setColor(this.#colorScope, this.#colorTarget, color);
+        } else if (key === 'ArrowUp') {
+            writer.cursorUp();
+        } else if (key === 'ArrowDown') {
+            writer.cursorDown();
+        } else if (key === 'ArrowLeft') {
+            writer.cursorLeft();
+        } else if (key === 'ArrowRight') {
+            writer.cursorRight();
+        } else if (key === 'F2') {
+            if (!shiftKey) {
+                this.#colorTarget = 'foreground';
+            } else {
+                writer.setColor(this.#colorScope, 'foreground', null);
+            }
+        } else if (key === 'F3') {
+            if (!shiftKey) {
+                this.#colorTarget = 'background';
+            } else {
+                writer.setColor(this.#colorScope, 'background', null);
+            }
+        } else if (key === 'F4') {
+            if (!shiftKey) {
+                this.#colorTarget = 'border';
+            } else {
+                writer.setColor(this.#colorScope, 'border', null);
+            }
+        } else if (key === 'F6') {
+            writer.setPulse(this.#colorScope, this.#colorTarget, !shiftKey);
+        } else if (key === 'F7') {
+            this.#colorScope = shiftKey ? 'global' : 'cursor';
+        } else if (key === 'F9') {
+            this.#autoAdvance = !shiftKey;
+        } else if (key === 'F10') {
+            writer.play();
+        } else if (key === 'Delete') {
+            writer.clearCell();
+        } else if (key === 'Backspace') {
+            if (writer.retract()) {
                 writer.clearCell();
-                break;
-            case event.key === 'Backspace':
-                if (writer.retract()) {
-                    writer.clearCell();
-                }
-                break;
-            case event.key === 'PageDown':
-                writer.scroll();
-                break;
-            case event.key.length == 1:
-                writer.character(event.key);
-                if (this.#autoAdvance) {
-                    writer.advance();
-                }
-                break;
-            default:
-                handled = false;
-                console.log(`Key:'${event.key}' Shift:${event.shiftKey ? 'yes' : 'no'} Ctrl:${event.ctrlKey ? 'yes' : 'no'} Alt:${event.altKey ? 'yes' : 'no'}`);
-                break;
+            }
+        } else if (key === 'PageDown') {
+            writer.scroll();
+        } else if (key.length === 1) {
+            writer.character(key);
+            if (this.#autoAdvance) {
+                writer.advance();
+            }
+        } else {
+            handled = false;
+            console.log(`Key:'${key}' Shift:${shiftKey ? 'yes' : 'no'} Ctrl:${ctrlKey ? 'yes' : 'no'} Alt:${altKey ? 'yes' : 'no'}`);
         }
 
         // Omit browser default behavior in case we handled the key
