@@ -32,10 +32,40 @@ export default class App {
 
     /** @param {KeyboardEvent} event */
     #onKeyDown(event) {
-        const writer = this.#writer;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+        const appState = this.#writer.appState;
+
+        // Omit browser default behavior for all keys
+        event.preventDefault();
 
         let handled = true;
+
+        if (appState === 'record') {
+            handled = this.#handleAppStateRecordKey(event);
+        } else if (appState === 'play') {
+            handled = this.#handleAppStatePlayKey(event);
+        } else if (appState === 'pause') {
+            handled = this.#handleAppStatePauseKey(event);
+        } else {
+            console.error(`Invalid app state '${appState}'`);
+            return;
+        }
+
+        if (!handled) {
+            console.warn(`Unhandled key '${event.key}' (`
+                + `Shift:${event.shiftKey ? 'yes' : 'no'} `
+                + `Ctrl:${event.ctrlKey ? 'yes' : 'no'} `
+                + `Alt:${event.altKey ? 'yes' : 'no'}) `
+                + `in app state '${appState}'.`
+            );
+        }
+    }
+
+    /**
+     * @returns {boolean} false if key has not been handled
+     */
+    #handleAppStateRecordKey(event) {
+        const writer = this.#writer;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
 
         if (ctrlKey && key >= '0' && key <= '9') {
             const color = Writer.colorPalette[(Number(key) + 9) % Writer.colorPalette.length];
@@ -88,14 +118,42 @@ export default class App {
                 writer.advance();
             }
         } else {
-            handled = false;
-            console.log(`Key:'${key}' Shift:${shiftKey ? 'yes' : 'no'} Ctrl:${ctrlKey ? 'yes' : 'no'} Alt:${altKey ? 'yes' : 'no'}`);
+            return false;
         }
 
-        // Omit browser default behavior in case we handled the key
-        if (handled) {
-            event.preventDefault();
+        return true;
+    }
+
+    /**
+     * @returns {boolean} false if key has not been handled
+     */
+    #handleAppStatePlayKey(event) {
+        const writer = this.#writer;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+
+        if (key === 'Pause' || key === ' ') {
+            writer.appState = 'pause';
+        } else {
+            return false;
         }
+
+        return true;
+    }
+
+    /**
+     * @returns {boolean} false if key has not been handled
+     */
+    #handleAppStatePauseKey(event) {
+        const writer = this.#writer;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+
+        if (key === 'Pause' || key === ' ') {
+            writer.appState = 'play';
+        } else {
+            return false;
+        }
+
+        return true;
     }
 
     printHelp() {
@@ -113,6 +171,7 @@ export default class App {
             'Delete       Clear cell under cursor',
             'Backspace    Retract cursor and clear cell under cursor',
             'PageDown     Scroll without moving cursor',
+            'Pause/Space  (Playback mode) Pause/Continue',
             // TODO: Toggle FPS/Debug
         ];
 

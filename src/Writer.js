@@ -41,6 +41,9 @@ export default class Writer {
 
     // From here on properties to be set on init()...
 
+    /** @type {('record'|'play'|'pause'|'menu')} */
+    #appState;
+
     /** @type {number} Timestamp of last frame render */
     #lastRun;
 
@@ -74,14 +77,8 @@ export default class Writer {
     /** @type {number} Calculated cell height */
     #cellHeight;
 
-    /**
-     * @type {boolean}
-     * @todo Introduce state machine: Menu, Record, Playback, ...
-     */
-    #playback;
-
     /** @type {number} Timestamp of last playback instruction */
-    #playbackLastTimestamp = 0;
+    #playbackLastTimestamp;
 
 
     /**
@@ -109,6 +106,8 @@ export default class Writer {
     }
 
     init() {
+        this.#appState = 'record';
+
         this.#lastRun = performance.now();
 
         this.#debug = null;
@@ -134,8 +133,6 @@ export default class Writer {
         this.#cellWidth = (this.#canvas.width - this.#borderWidth * 2) / this.#cols;
         this.#cellHeight = (this.#canvas.height - this.#borderWidth * 2) / this.#rows;
 
-        this.#playback = false;
-
         this.#playbackLastTimestamp = 0;
     }
 
@@ -153,9 +150,18 @@ export default class Writer {
         requestAnimationFrame(this.mainLoop.bind(this));
     }
 
+    get appState() {
+        return this.#appState;
+    }
+
+    set appState(state) {
+        // TODO: Validate state transition
+        this.#appState = state;
+    }
+
     play() {
         this.init();
-        this.#playback = true;
+        this.#appState = 'play';
         this.#playbackLastTimestamp = 0;
         this.#demo.resetInstructionIndex();
     }
@@ -172,7 +178,9 @@ export default class Writer {
      * @param {number} timestamp Current timestamp
      */
     #update(timestamp) {
-        if (this.#playback) {
+        const appState = this.#appState;
+
+        if (appState === 'play') {
             const msPlaybackWait = 100 * (1 - this.#speed);
 
             if (timestamp - this.#playbackLastTimestamp > msPlaybackWait) {
@@ -185,54 +193,56 @@ export default class Writer {
                         this.#playbackLastTimestamp = 0;
                     }
                 } else {
-                    this.#playback = false;
-                    console.info('Playback stopped');
+                    this.#appState = 'record';
+                    console.info('Playback stopped, switched back to record state');
                 }
             }
         }
 
-        // Cycle
-        const msCycleWait = 50 * (1 - this.#speed);
+        if (['record', 'play'].includes(appState)) {
+            // Cycle
+            const msCycleWait = 50 * (1 - this.#speed);
 
-        if (timestamp - this.#cycleLastTimestamp > msCycleWait) {
-            // TODO: Cycle with quadratic function instead of linear?
-            if (this.#cycleUp) {
-                this.#cycleVal += 10;
-                if (this.#cycleVal >= 255) {
-                    this.#cycleVal = 255;
-                    this.#cycleUp = false;
+            if (timestamp - this.#cycleLastTimestamp > msCycleWait) {
+                // TODO: Cycle with quadratic function instead of linear?
+                if (this.#cycleUp) {
+                    this.#cycleVal += 10;
+                    if (this.#cycleVal >= 255) {
+                        this.#cycleVal = 255;
+                        this.#cycleUp = false;
+                    }
+                } else {
+                    this.#cycleVal -= 20;
+                    if (this.#cycleVal <= 0) {
+                        this.#cycleVal = 0;
+                        this.#cycleUp = true;
+                    }
                 }
-            } else {
-                this.#cycleVal -= 20;
-                if (this.#cycleVal <= 0) {
-                    this.#cycleVal = 0;
-                    this.#cycleUp = true;
-                }
+
+                this.#cycleLastTimestamp = timestamp;
             }
 
-            this.#cycleLastTimestamp = timestamp;
-        }
+            // Afterglow
+            const msAfterglowWait = 5 * (1 - this.#speed);
 
-        // Afterglow
-        const msAfterglowWait = 5 * (1 - this.#speed);
+            if (timestamp - this.#afterglowLastTimestamp > msAfterglowWait) {
+                for (let row = 0; row < this.#rows; row++) {
+                    for (let col = 0; col < this.#cols; col++) {
+                        const cell = this.getCell(col, row);
 
-        if (timestamp - this.#afterglowLastTimestamp > msAfterglowWait) {
-            for (let row = 0; row < this.#rows; row++) {
-                for (let col = 0; col < this.#cols; col++) {
-                    const cell = this.getCell(col, row);
-
-                    if (this.#globalStyle.backgroundPulse) {
-                        cell.afterglowCounter = null;       // reset any afterglow
-                    } else if (cell.afterglowCounter !== null) {
-                        cell.afterglowCounter -= 5;
-                        if (cell.afterglowCounter <= 0) {
-                            cell.afterglowCounter = null;
+                        if (this.#globalStyle.backgroundPulse) {
+                            cell.afterglowCounter = null;       // reset any afterglow
+                        } else if (cell.afterglowCounter !== null) {
+                            cell.afterglowCounter -= 5;
+                            if (cell.afterglowCounter <= 0) {
+                                cell.afterglowCounter = null;
+                            }
                         }
                     }
                 }
-            }
 
-            this.#afterglowLastTimestamp = timestamp;
+                this.#afterglowLastTimestamp = timestamp;
+            }
         }
     }
 
@@ -257,6 +267,10 @@ export default class Writer {
     #renderInfo(fps) {
         const c = this.#ctx;
         let infoParts = [Math.floor(fps) + ' fps'];
+
+        if (this.#appState === 'pause') {
+            infoParts.push('!!! PAUSE !!!');
+        }
 
         c.fillStyle = 'Gray';
         c.font = '0.75rem monospace';
@@ -387,7 +401,7 @@ export default class Writer {
      * @param {Instruction} instruction
      */
     #record(instruction) {
-        if (!this.#playback) {
+        if (this.#appState === 'record') {
             this.#demo.addInstruction(instruction);
         }
     }
