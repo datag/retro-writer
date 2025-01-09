@@ -4,8 +4,6 @@ import Instruction from './Instruction';
 import Demo from './Demo';
 
 export default class Writer {
-    static AppVersion = import.meta.env.VITE_PACKAGE_VERSION;       // Move to App class
-
     constructor(canvas, width, height, cols = 40, rows = 25) {
         /** @type {HTMLCanvasElement} */
         this.canvas = canvas;

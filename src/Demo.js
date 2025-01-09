@@ -1,9 +1,9 @@
-import Writer from './Writer';
+import App from './App';
 import Instruction from './Instruction';
 
 export default class Demo {
     constructor() {
-        this.version = Writer.AppVersion;
+        this.version = App.appVersion;
 
         /** @type {Instruction[]} */
         this.instructions = [];
