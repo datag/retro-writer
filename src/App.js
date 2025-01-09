@@ -39,7 +39,10 @@ export default class App {
 
         let handled = true;
 
-        if (appState === 'record') {
+        if (event.key === 'PrintScreen') {
+            this.downloadScreenshot();
+            handled = true;
+        } else if (appState === 'record') {
             handled = this.#handleAppStateRecordKey(event);
         } else if (appState === 'play') {
             handled = this.#handleAppStatePlayKey(event);
@@ -172,9 +175,17 @@ export default class App {
             'Backspace    Retract cursor and clear cell under cursor',
             'PageDown     Scroll without moving cursor',
             'Pause/Space  (Playback mode) Pause/Continue',
+            '(CTRL)+Print Download screenshot',
             // TODO: Toggle FPS/Debug
         ];
 
         help.forEach((line) => console.info(line));
+    }
+
+    downloadScreenshot() {
+        const anchor = document.createElement('a');
+        anchor.download = `retrowriter-${App.appVersion}-${Date.now()}.png`;
+        anchor.href = this.#writer.exportCanvas();
+        anchor.click();
     }
 }

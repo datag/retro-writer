@@ -159,6 +159,10 @@ export default class Writer {
         this.#appState = state;
     }
 
+    exportCanvas() {
+        return this.#canvas.toDataURL();
+    }
+
     play() {
         this.init();
         this.#appState = 'play';
