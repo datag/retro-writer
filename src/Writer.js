@@ -146,7 +146,6 @@ export default class Writer {
         const delta = (timestamp - this.#lastRun) / 1000;
         const fps = 1 / delta;
 
-        this.#handleInput();
         this.#update(timestamp);
         this.#render(fps);
 
@@ -167,9 +166,6 @@ export default class Writer {
 
     static #to2DigitHex(value) {
         return value.toString(16).padStart(2, '0');
-    }
-
-    #handleInput() {
     }
 
     /**
