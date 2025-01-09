@@ -16,6 +16,7 @@ export default class App {
     /** @type {boolean} Whether character input automatically advances cursor */
     #autoAdvance = true;
 
+
     /**
      * @param {HTMLCanvasElement} canvas
      */
@@ -37,7 +38,7 @@ export default class App {
         let handled = true;
 
         if (ctrlKey && key >= '0' && key <= '9') {
-            const color = Writer.debugColors[(Number(key) + 9) % Writer.debugColors.length];
+            const color = Writer.colorPalette[(Number(key) + 9) % Writer.colorPalette.length];
             writer.setColor(this.#colorScope, this.#colorTarget, color);
         } else if (key === 'ArrowUp') {
             writer.cursorUp();

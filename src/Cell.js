@@ -1,17 +1,35 @@
 export default class Cell {
-    constructor() {
-        this.foregroundColor = null;
-        this.foregroundPulse = false;
+    /** @type {?string} Foreground color */
+    foregroundColor = null;
 
-        this.backgroundColor = null;
-        this.backgroundPulse = false;
+    /** @type {boolean} Foreground pulse */
+    foregroundPulse = false;
 
-        this.borderColor = null;
-        this.borderPulse = false;
 
-        this.afterglowColor = null;     // TODO: Change to CellStyle and also handle border and character in afterglow
-        this.afterglowCounter = null;
+    /** @type {?string} Background color */
+    backgroundColor = null;
 
-        this.character = null;
-    }
+    /** @type {boolean} Background pulse */
+    backgroundPulse = false;
+
+
+    /** @type {?string} Border color */
+    borderColor = null;
+
+    /** @type {boolean} Border pulse */
+    borderPulse = false;
+
+
+    /** @type {?string} Character/Symbol */
+    character = null;
+
+
+    /**
+     * @type {?string} Afterglow color
+     * @todo Change to Cell (style) and also handle border and character in afterglow
+     */
+    afterglowColor = null;
+
+    /** @type {number} Afterglow counter ranging from 0 to 255 (integer) */
+    afterglowCounter = null;
 };

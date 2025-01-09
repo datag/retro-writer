@@ -1,28 +1,34 @@
 export default class Instruction {
-    static CursorUp       = 'CUP';
-    static CursorDown     = 'CDW';
-    static CursorLeft     = 'CLF';
-    static CursorRight    = 'CRT';
-    static Scroll         = 'SCR';
-    static Advance        = 'ADV';
-    static Retract        = 'RCT';
-    static Character      = 'CHR';
-    static ClearCell      = 'CLR';
+    static cursorUp    = 'CUP';
+    static cursorDown  = 'CDW';
+    static cursorLeft  = 'CLF';
+    static cursorRight = 'CRT';
+    static scroll      = 'SCR';
+    static advance     = 'ADV';
+    static retract     = 'RCT';
+    static character   = 'CHR';
+    static clearCell   = 'CLR';
 
-    static CursorForegroundColor = 'CFC';
-    static CursorBackgroundColor = 'CBC';
-    static CursorBorderColor     = 'CDC';
-    static CursorForegroundPulse = 'CFP';
-    static CursorBackgroundPulse = 'CBP';
-    static CursorBorderPulse     = 'CDP';
+    static cursorForegroundColor = 'CFC';
+    static cursorBackgroundColor = 'CBC';
+    static cursorBorderColor     = 'CDC';
+    static cursorForegroundPulse = 'CFP';
+    static cursorBackgroundPulse = 'CBP';
+    static cursorBorderPulse     = 'CDP';
 
-    static GlobalForegroundColor = 'GFC';
-    static GlobalBackgroundColor = 'GBC';
-    static GlobalBorderColor     = 'GDC';
-    static GlobalForegroundPulse = 'GFP';
-    static GlobalBackgroundPulse = 'GBP';
-    static GlobalBorderPulse     = 'GDP';
+    static globalForegroundColor = 'GFC';
+    static globalBackgroundColor = 'GBC';
+    static globalBorderColor     = 'GDC';
+    static globalForegroundPulse = 'GFP';
+    static globalBackgroundPulse = 'GBP';
+    static globalBorderPulse     = 'GDP';
 
+
+    /**
+     * @param {string} mnemonic Instruction mnemonic
+     * @param {null|string|number} argument1 First argument (depending on instruction)
+     * @param {null|string|number} argument2 Second argument (depending on instruction)
+     */
     constructor(mnemonic, argument1 = null, argument2 = null) {
         this.mnemonic = mnemonic;
         this.argument1 = argument1;
