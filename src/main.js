@@ -1,5 +1,5 @@
 import './style.css'
-import { Writer } from './writer.js'
+import Writer from './Writer'
 
 const canvas = document.querySelector('#writerCanvas');
 
