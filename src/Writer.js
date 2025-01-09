@@ -261,8 +261,15 @@ export default class Writer {
         this.#renderCells();
         this.#renderCursor();
 
+        if (this.#appState === 'pause') {
+            this.#renderPause();
+        }
+
         this.#renderInfo(fps);
-        this.#renderDebug();
+
+        if (this.#debug) {
+            this.#renderDebug();
+        }
     }
 
     /**
@@ -270,26 +277,48 @@ export default class Writer {
      */
     #renderInfo(fps) {
         const c = this.#ctx;
+
         let infoParts = [Math.floor(fps) + ' fps'];
 
-        if (this.#appState === 'pause') {
-            infoParts.push('!!! PAUSE !!!');
-        }
-
+        const fontSize = this.#cellHeight * 0.5;
         c.fillStyle = 'Gray';
-        c.font = '0.75rem monospace';
-        c.fillText(infoParts.join(' · '), 2, 12);
+        c.font = `${fontSize}px monospace`;
+        c.fillText(infoParts.join(' · '), 2, fontSize);
     }
 
     #renderDebug() {
         const c = this.#ctx;
 
-        if (!this.#debug) {
-            return;
-        }
-
         c.fillStyle = 'Red';
         c.fillText(JSON.stringify(this.#debug), 2, 30);
+    }
+
+    #renderPause() {
+        const c = this.#ctx;
+
+        const text = '♥︎ PAUSE ♥︎';
+        const fontSize = this.#cellHeight * 5;
+        const counter = Math.ceil(Date.now() / 400);
+
+        c.font = `${fontSize}px monospace`;
+
+        const metrics = c.measureText(text);
+        const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        const x = this.#canvas.width / 2 - metrics.width / 2, y = this.#canvas.height / 2 + textHeight / 2;
+
+        c.lineWidth = fontSize * 0.02;
+
+        c.fillStyle = Writer.colorPalette[counter % Math.min(Writer.colorPalette.length, 4)];
+        c.fillText(text, x, y);
+        c.strokeStyle = 'black';
+        c.strokeText(text, x, y);
+
+        const distance = fontSize * 0.04;
+
+        c.fillStyle = 'black';
+        c.fillText(text, x - distance, y - distance);
+        c.strokeStyle = 'white';
+        c.strokeText(text, x - distance, y - distance);
     }
 
     #renderCells() {
