@@ -42,17 +42,17 @@ class Instruction {
 
     static CursorForegroundColor = 'CFC';
     static CursorBackgroundColor = 'CBC';
-    static CursorBorderColor = 'CDC';
+    static CursorBorderColor     = 'CDC';
     static CursorForegroundPulse = 'CFP';
     static CursorBackgroundPulse = 'CBP';
-    static CursorBorderPulse = 'CDP';
+    static CursorBorderPulse     = 'CDP';
 
     static GlobalForegroundColor = 'GFC';
     static GlobalBackgroundColor = 'GBC';
-    static GlobalBorderColor = 'GDC';
+    static GlobalBorderColor     = 'GDC';
     static GlobalForegroundPulse = 'GFP';
     static GlobalBackgroundPulse = 'GBP';
-    static GlobalBorderPulse = 'GDP';
+    static GlobalBorderPulse     = 'GDP';
 
     constructor(mnemonic, argument1 = null, argument2 = null) {
         this.mnemonic = mnemonic;
@@ -125,6 +125,7 @@ export class Writer {
         this.init();
     }
 
+    // TODO: Transform to palette
     static debugColors = [
         '#ff0000', // Red
         '#00ff00', // Green
@@ -232,7 +233,7 @@ export class Writer {
                     }
                 } else {
                     this.playback = false;
-                    console.info('Plackback stopped');
+                    console.info('Playback stopped');
                 }
             }
         }

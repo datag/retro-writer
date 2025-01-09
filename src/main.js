@@ -115,6 +115,7 @@ window.addEventListener('keydown', (event) => {
         'Delete       Clear cell under cursor',
         'Backspace    Retract cursor and clear cell under cursor',
         'PageDown     Scroll without moving cursor',
+        // TODO: Toggle FPS/Debug
     ];
 
     help.forEach((line) => console.info(line));
