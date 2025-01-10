@@ -34,4 +34,21 @@ export default class Instruction {
         this.argument1 = argument1;
         this.argument2 = argument2;
     }
+
+    /**
+     * @returns {string|*[]}
+     */
+    toData() {
+        if (this.argument1 === null && this.argument2 === null) {
+            return this.mnemonic;
+        } else {
+            const data = [this.mnemonic];
+            if (this.argument2 !== null) {
+                data.push(this.argument1, this.argument2);
+            } else {
+                data.push(this.argument1);
+            }
+            return data;
+        }
+    }
 }

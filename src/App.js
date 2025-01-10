@@ -106,7 +106,11 @@ export default class App {
         } else if (key === 'F9') {
             this.#autoAdvance = !shiftKey;
         } else if (key === 'F10') {
-            writer.play();
+            if (!shiftKey) {
+                writer.play();
+            } else {
+                this.downloadDemo();
+            }
         } else if (key === 'Delete') {
             writer.clearCell();
         } else if (key === 'Backspace') {
@@ -180,6 +184,7 @@ export default class App {
             'PageDown     Scroll without moving cursor',
             'Pause/Space  (Playback mode) Pause/Continue',
             '(CTRL)+Print Download screenshot',
+            'SHIFT + F10  Download demo',
             'F5           Reset',
             // TODO: Toggle FPS/Debug
         ];
@@ -192,5 +197,21 @@ export default class App {
         anchor.download = `retrowriter-${App.appVersion}-${Date.now()}.png`;
         anchor.href = this.#writer.exportCanvas();
         anchor.click();
+    }
+
+    downloadDemo() {
+        const json = JSON.stringify(this.#writer.exportDemo(), null, 2);
+
+        const blob = new Blob([json], { type: 'application/json' });
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `retrowriter-${App.appVersion}-${Date.now()}.json`;
+
+        a.click();
+
+        URL.revokeObjectURL(url);
     }
 }

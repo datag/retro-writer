@@ -50,4 +50,14 @@ export default class Demo {
 
         return instruction;
     }
+
+    export() {
+        return {
+            header: {
+                version: this.#version,
+                // TODO: name, settings, ...
+            },
+            instructions: this.#instructions.map((instruction) => instruction.toData())
+        };
+    }
 }
