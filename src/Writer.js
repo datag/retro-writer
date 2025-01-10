@@ -69,6 +69,12 @@ export default class Writer {
     /** @type {number} Timestamp of last playback instruction */
     #playbackLastTimestamp;
 
+    /** @type {number} Current frames per second (since #fpsLastTimestamp) */
+    #fps;
+
+    /** @type {number} Timestamp of last fps update */
+    #fpsLastTimestamp;
+
 
     /**
      * @param {HTMLCanvasElement} canvas
@@ -112,6 +118,9 @@ export default class Writer {
         this.#cursor = new Cursor();
 
         this.#playbackLastTimestamp = 0;
+
+        this.#fps = 0;
+        this.#fpsLastTimestamp = 0;
     }
 
     /**
@@ -121,8 +130,13 @@ export default class Writer {
         const delta = (timestamp - this.#lastRun) / 1000;
         const fps = 1 / delta;
 
+        if (!this.#fps || timestamp - this.#fpsLastTimestamp > 250) {
+            this.#fps = fps;
+            this.#fpsLastTimestamp = timestamp;
+        }
+
         this.#update(timestamp);
-        this.#screen.render(this, fps);
+        this.#screen.render(this);
 
         this.#lastRun = timestamp;
         requestAnimationFrame(this.mainLoop.bind(this));
@@ -143,6 +157,10 @@ export default class Writer {
 
     get debug() {
         return this.#debug;
+    }
+
+    get fps() {
+        return this.#fps;
     }
 
     get cycleVal() {

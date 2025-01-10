@@ -57,9 +57,8 @@ export default class Screen {
 
     /**
      * @param {Writer} writer
-     * @param {number} fps Calculated frames per second (float)
      */
-    render(writer, fps) {
+    render(writer) {
         const c = this.#ctx;
 
         c.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
@@ -71,7 +70,7 @@ export default class Screen {
             this.#renderPause(writer);
         }
 
-        this.#renderInfo(writer, fps);
+        this.#renderInfo(writer);
 
         if (writer.debug) {
             this.#renderDebug(writer);
@@ -80,12 +79,11 @@ export default class Screen {
 
     /**
      * @param {Writer} writer
-     * @param {number} fps Calculated frames per second (float)
      */
-    #renderInfo(writer, fps) {
+    #renderInfo(writer) {
         const c = this.#ctx;
 
-        let infoParts = [Math.floor(fps) + ' fps'];
+        let infoParts = [Math.floor(writer.fps) + ' fps'];
 
         const fontSize = this.#cellHeight * 0.5;
         c.fillStyle = 'Gray';
