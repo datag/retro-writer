@@ -7,3 +7,5 @@ const app = new App(canvas);
 
 app.printHelp();
 app.start();
+
+globalThis.app = app;
