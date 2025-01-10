@@ -144,6 +144,8 @@ export default class Screen {
      */
     #renderCells(writer) {
         const c = this.#ctx;
+        const globalStyle = writer.globalStyle;
+        const cycleVal = writer.cycleVal;
 
         for (let row = 0; row < this.#rows; row++) {
             for (let col = 0; col < this.#cols; col++) {
@@ -156,15 +158,15 @@ export default class Screen {
                     this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
                 );
 
-                let color = writer.globalStyle.backgroundColor;
+                let color = globalStyle.backgroundColor;
                 let transparency = null;
                 if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
                     if (cell.backgroundPulse) {
-                        transparency = writer.cycleVal;
+                        transparency = cycleVal;
                     }
-                } else if (writer.globalStyle.backgroundPulse) {
-                    transparency = writer.cycleVal;
+                } else if (globalStyle.backgroundPulse) {
+                    transparency = cycleVal;
                 } else if (cell.afterglowCounter !== null) {
                     color = cell.afterglowColor;
                     transparency = Math.ceil(cell.afterglowCounter * .5);
@@ -173,15 +175,15 @@ export default class Screen {
                 c.fill();
 
                 // Border
-                color = writer.globalStyle.borderColor;
+                color = globalStyle.borderColor;
                 transparency = null;
                 if (cell.borderColor !== null) {
                     color = cell.borderColor;
                     if (cell.borderPulse) {
-                        transparency = writer.cycleVal;
+                        transparency = cycleVal;
                     }
-                } else if (writer.globalStyle.borderPulse) {
-                    transparency = writer.cycleVal;
+                } else if (globalStyle.borderPulse) {
+                    transparency = cycleVal;
                 }
                 c.strokeStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
                 c.lineWidth = this.#borderWidth;
@@ -190,15 +192,15 @@ export default class Screen {
                 // Character
                 if (cell.character !== null) {
                     const fontSize = this.#cellHeight * .6;
-                    color = writer.globalStyle.foregroundColor;
+                    color = globalStyle.foregroundColor;
                     transparency = null;
                     if (cell.foregroundColor !== null) {
                         color = cell.foregroundColor;
                         if (cell.foregroundPulse) {
-                            transparency = writer.cycleVal;
+                            transparency = cycleVal;
                         }
-                    } else if (writer.globalStyle.foregroundPulse) {
-                        transparency = writer.cycleVal;
+                    } else if (globalStyle.foregroundPulse) {
+                        transparency = cycleVal;
                     }
                     c.fillStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
                     c.font = `bold ${fontSize}px monospace`;
