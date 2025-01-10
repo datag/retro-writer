@@ -175,6 +175,10 @@ export default class Writer {
         return this.#demo.export();
     }
 
+    importDemo(data) {
+        return this.#demo.import(data);
+    }
+
     play() {
         this.init();
         this.#appState = 'play';

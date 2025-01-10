@@ -51,4 +51,21 @@ export default class Instruction {
             return data;
         }
     }
+
+    /**
+     * @param {string|*[]} data
+     */
+    static fromData(data) {
+        if (typeof data === 'string') {
+            return new Instruction(data);
+        } else if (Array.isArray(data) && data.length > 0) {
+            if (typeof data[0] !== 'string') {
+                throw new Error(`Invalid instruction data: Expected string as mnemonic, got ${typeof data[0]}`);
+            }
+            const [mnemonic, argument1 = null, argument2 = null] = data;
+            return new Instruction(mnemonic, argument1, argument2);
+        } else {
+            throw new Error(`Invalid instruction data: Expected string or array with at least one item as instruction data, got ${typeof data}`);
+        }
+    }
 }

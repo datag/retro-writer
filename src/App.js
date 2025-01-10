@@ -28,6 +28,8 @@ export default class App {
 
     start() {
         this.#writer.mainLoop(performance.now());
+
+        this.#handleHashUrl();
     }
 
     /** @param {KeyboardEvent} event */
@@ -213,5 +215,35 @@ export default class App {
         a.click();
 
         URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Handle hash URLs.
+     * NOTE: GitHub Pages does not support rewrites so can only use a hash URL instead of a path.
+     * @param {string} hash
+     */
+    #handleHashUrl(hash = document.location.hash) {
+        const matches = hash.match(/^#(?<action>play):(?<argument>.*)/);
+
+        if (matches !== null) {
+            const action = matches.groups.action;
+            const argument = matches.groups.argument;
+
+            console.log(`Hash URL: Action ${action} with argument ${argument}`);
+
+            if (action === 'play') {
+                fetch(argument)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        this.#writer.importDemo(data);
+                        this.#writer.play();
+                    })
+                    .catch((e) => {
+                        console.error(`Error loading demo from URL '${argument}'`, e);
+                    });
+            } else {
+                alert(`Unhandled action '${action}'`);
+            }
+        }
     }
 }
