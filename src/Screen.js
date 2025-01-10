@@ -199,7 +199,7 @@ export default class Screen {
                         if (cell.foregroundPulse) {
                             transparency = cycleVal;
                         }
-                    } else if (globalStyle.foregroundPulse) {
+                    } else if (cell.foregroundPulse || globalStyle.foregroundPulse) {
                         transparency = cycleVal;
                     }
                     c.fillStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
