@@ -178,6 +178,16 @@ export default class Writer {
         this.#demo.resetInstructionIndex();
     }
 
+    reset() {
+        this.init();
+        this.#demo = new Demo();
+    }
+
+    /**
+     * @param {number} col Column
+     * @param {number} row Row
+     * @returns {Cell}
+     */
     getCell(col, row) {
         return this.#cells[row * this.#cols + col];
     }

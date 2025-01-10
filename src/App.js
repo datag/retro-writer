@@ -115,6 +115,10 @@ export default class App {
             }
         } else if (key === 'PageDown') {
             writer.scroll();
+        } else if (key === 'Pause') {
+            writer.appState = 'pause';
+        } else if (key === 'F5') {
+            writer.reset();
         } else if (key.length === 1) {
             writer.character(key);
             if (this.#autoAdvance) {
@@ -176,6 +180,7 @@ export default class App {
             'PageDown     Scroll without moving cursor',
             'Pause/Space  (Playback mode) Pause/Continue',
             '(CTRL)+Print Download screenshot',
+            'F5           Reset',
             // TODO: Toggle FPS/Debug
         ];
 
