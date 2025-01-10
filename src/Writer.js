@@ -39,8 +39,26 @@ export default class Writer {
     /** @type {('record'|'play'|'pause'|'menu')} */
     #appState;
 
-    /** @type {number} Timestamp of last frame render */
-    #lastRun;
+    /**
+     * @typedef {Object} LastTimestamp
+     * @property {number} run       - Last run
+     * @property {number} fps       - Last FPS calculation
+     * @property {number} cycle     - Last animation cycle
+     * @property {number} afterglow - Last afterglow effect
+     * @property {number} playback  - Last playback instruction
+     */
+
+    /** @type {LastTimestamp} */
+    #lastTimestamp = {
+        run: 0,
+        fps: 0,
+        cycle: 0,
+        afterglow: 0,
+        playback: 0,
+    };
+
+    /** @type {?number} Frames per second since last calculation */
+    #fps;
 
     /** @type {*} */
     #debug;
@@ -48,32 +66,17 @@ export default class Writer {
     /** @type {Cell[]} */
     #cells;
 
-    /** @type {number} Timestamp of last cycle */
-    #cycleLastTimestamp;
-
     /** @type {number} Cycle value between 0 and 255 */
     #cycleVal;
 
     /** @type {bool} Cycle direction (up=true, down=false) */
     #cycleUp;
 
-    /** @type {number} Timestamp of last afterflow decrement */
-    #afterglowLastTimestamp;
-
     /** @type {Cell} */
     #globalStyle = new Cell();
 
     /** @type {Cursor} */
     #cursor;
-
-    /** @type {number} Timestamp of last playback instruction */
-    #playbackLastTimestamp;
-
-    /** @type {number} Current frames per second (since #fpsLastTimestamp) */
-    #fps;
-
-    /** @type {number} Timestamp of last fps update */
-    #fpsLastTimestamp;
 
 
     /**
@@ -95,7 +98,10 @@ export default class Writer {
     init() {
         this.#appState = 'record';
 
-        this.#lastRun = performance.now();
+        Object.keys(this.#lastTimestamp).forEach(key => this.#lastTimestamp[key] = 0);
+        this.#lastTimestamp.fps = performance.now();    // Initialize with current TS to give FPS counter time to calculate
+
+        this.#fps = null;
 
         this.#debug = null;
 
@@ -104,11 +110,8 @@ export default class Writer {
             this.#cells.push(new Cell());
         }
 
-        this.#cycleLastTimestamp = 0;
         this.#cycleVal = 0;
         this.#cycleUp = true;
-
-        this.#afterglowLastTimestamp = 0;
 
         this.#globalStyle = new Cell();
         this.#globalStyle.foregroundColor = '#eeeeee';
@@ -116,29 +119,22 @@ export default class Writer {
         this.#globalStyle.borderColor = '#222222';
 
         this.#cursor = new Cursor();
-
-        this.#playbackLastTimestamp = 0;
-
-        this.#fps = 0;
-        this.#fpsLastTimestamp = 0;
     }
 
     /**
      * @param {number} timestamp Current timestamp
      */
     mainLoop(timestamp) {
-        const delta = (timestamp - this.#lastRun) / 1000;
-        const fps = 1 / delta;
-
-        if (!this.#fps || timestamp - this.#fpsLastTimestamp > 250) {
-            this.#fps = fps;
-            this.#fpsLastTimestamp = timestamp;
+        if (timestamp - this.#lastTimestamp.fps > 250) {
+            const delta = (timestamp - this.#lastTimestamp.run) / 1000;
+            this.#fps = 1 / delta;
+            this.#lastTimestamp.fps = timestamp;
         }
 
         this.#update(timestamp);
         this.#screen.render(this);
 
-        this.#lastRun = timestamp;
+        this.#lastTimestamp.run = timestamp;
         requestAnimationFrame(this.mainLoop.bind(this));
     }
 
@@ -178,7 +174,7 @@ export default class Writer {
     play() {
         this.init();
         this.#appState = 'play';
-        this.#playbackLastTimestamp = 0;
+        this.#lastTimestamp.playback = 0;
         this.#demo.resetInstructionIndex();
     }
 
@@ -195,14 +191,14 @@ export default class Writer {
         if (appState === 'play') {
             const msPlaybackWait = 100 * (1 - this.#speed);
 
-            if (timestamp - this.#playbackLastTimestamp > msPlaybackWait) {
+            if (timestamp - this.#lastTimestamp.playback > msPlaybackWait) {
                 const instruction = this.#demo.nextInstruction();
                 if (instruction !== null) {
                     const delay = this.#executeInstruction(instruction);
 
-                    this.#playbackLastTimestamp = timestamp;
+                    this.#lastTimestamp.playback = timestamp;
                     if (!delay) {
-                        this.#playbackLastTimestamp = 0;
+                        this.#lastTimestamp.playback = 0;
                     }
                 } else {
                     this.#appState = 'record';
@@ -215,7 +211,7 @@ export default class Writer {
             // Cycle
             const msCycleWait = 50 * (1 - this.#speed);
 
-            if (timestamp - this.#cycleLastTimestamp > msCycleWait) {
+            if (timestamp - this.#lastTimestamp.cycle > msCycleWait) {
                 // TODO: Cycle with quadratic function instead of linear?
                 if (this.#cycleUp) {
                     this.#cycleVal += 10;
@@ -231,13 +227,13 @@ export default class Writer {
                     }
                 }
 
-                this.#cycleLastTimestamp = timestamp;
+                this.#lastTimestamp.cycle = timestamp;
             }
 
             // Afterglow
             const msAfterglowWait = 5 * (1 - this.#speed);
 
-            if (timestamp - this.#afterglowLastTimestamp > msAfterglowWait) {
+            if (timestamp - this.#lastTimestamp.afterglow > msAfterglowWait) {
                 for (let row = 0; row < this.#rows; row++) {
                     for (let col = 0; col < this.#cols; col++) {
                         const cell = this.getCell(col, row);
@@ -253,7 +249,7 @@ export default class Writer {
                     }
                 }
 
-                this.#afterglowLastTimestamp = timestamp;
+                this.#lastTimestamp.afterglow = timestamp;
             }
         }
     }

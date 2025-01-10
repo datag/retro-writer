@@ -27,7 +27,7 @@ export default class App {
     }
 
     start() {
-        this.#writer.mainLoop();
+        this.#writer.mainLoop(performance.now());
     }
 
     /** @param {KeyboardEvent} event */

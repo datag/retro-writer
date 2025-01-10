@@ -82,13 +82,20 @@ export default class Screen {
      */
     #renderInfo(writer) {
         const c = this.#ctx;
+        const fps = writer.fps;
 
-        let infoParts = [Math.floor(writer.fps) + ' fps'];
+        let infoParts = [];
 
-        const fontSize = this.#cellHeight * 0.5;
-        c.fillStyle = 'Gray';
-        c.font = `${fontSize}px monospace`;
-        c.fillText(infoParts.join(' · '), 2, fontSize);
+        if (fps !== null) {
+            infoParts.push(Math.floor(writer.fps) + ' fps');
+        }
+
+        if (infoParts.length) {
+            const fontSize = this.#cellHeight * 0.5;
+            c.fillStyle = 'Gray';
+            c.font = `${fontSize}px monospace`;
+            c.fillText(infoParts.join(' · '), 2, fontSize);
+        }
     }
 
     /**
