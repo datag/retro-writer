@@ -1,7 +1,8 @@
+import Screen from './Screen';
+import Demo from './Demo';
 import Cell from './Cell';
 import Cursor from './Cursor';
 import Instruction from './Instruction';
-import Demo from './Demo';
 
 export default class Writer {
     static colorPalette = [
@@ -17,23 +18,17 @@ export default class Writer {
         '#111111', // Almost black
     ];
 
-    /** @type {HTMLCanvasElement} */
-    #canvas;
-
-    /** @type {CanvasRenderingContext2D} */
-    #ctx;
-
     /** @type {number} Number of columns */
     #cols;
 
     /** @type {number} Number of rows */
     #rows;
 
+    /** @type {Screen} */
+    #screen;
+
     /** @type {Demo} */
     #demo = new Demo();
-
-    /** @type {number} */
-    #borderWidth = 2;
 
     /** @type {number} Speed between 0 and 1 (float) */
     #speed = .5;
@@ -71,12 +66,6 @@ export default class Writer {
     /** @type {Cursor} */
     #cursor;
 
-    /** @type {number} Calculated cell width */
-    #cellWidth;
-
-    /** @type {number} Calculated cell height */
-    #cellHeight;
-
     /** @type {number} Timestamp of last playback instruction */
     #playbackLastTimestamp;
 
@@ -89,18 +78,10 @@ export default class Writer {
      * @param {number} rows Number of rows
      */
     constructor(canvas, width, height, cols = 40, rows = 25) {
-        this.#canvas = canvas;
-
-        this.#canvas.width = width;
-        this.#canvas.height = height;
-
-        this.#ctx = canvas.getContext('2d');
-
-        /** @type {number} */
         this.#cols = cols;
-
-        /** @type {number} */
         this.#rows = rows;
+
+        this.#screen = new Screen(canvas, width, height, cols, rows);
 
         this.init();
     }
@@ -130,9 +111,6 @@ export default class Writer {
 
         this.#cursor = new Cursor();
 
-        this.#cellWidth = (this.#canvas.width - this.#borderWidth * 2) / this.#cols;
-        this.#cellHeight = (this.#canvas.height - this.#borderWidth * 2) / this.#rows;
-
         this.#playbackLastTimestamp = 0;
     }
 
@@ -144,7 +122,7 @@ export default class Writer {
         const fps = 1 / delta;
 
         this.#update(timestamp);
-        this.#render(fps);
+        this.#screen.render(this, fps);
 
         this.#lastRun = timestamp;
         requestAnimationFrame(this.mainLoop.bind(this));
@@ -159,8 +137,24 @@ export default class Writer {
         this.#appState = state;
     }
 
+    get cursor() {
+        return this.#cursor;
+    }
+
+    get debug() {
+        return this.#debug;
+    }
+
+    get cycleVal() {
+        return this.#cycleVal;
+    }
+
+    get globalStyle() {
+        return this.#globalStyle;
+    }
+
     exportCanvas() {
-        return this.#canvas.toDataURL();
+        return this.#screen.canvas.toDataURL();
     }
 
     play() {
@@ -172,10 +166,6 @@ export default class Writer {
 
     getCell(col, row) {
         return this.#cells[row * this.#cols + col];
-    }
-
-    static #to2DigitHex(value) {
-        return value.toString(16).padStart(2, '0');
     }
 
     /**
@@ -248,169 +238,6 @@ export default class Writer {
                 this.#afterglowLastTimestamp = timestamp;
             }
         }
-    }
-
-    /**
-     * @param {number} fps Calculated frames per second (float)
-     */
-    #render(fps) {
-        const c = this.#ctx;
-
-        c.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-
-        this.#renderCells();
-        this.#renderCursor();
-
-        if (this.#appState === 'pause') {
-            this.#renderPause();
-        }
-
-        this.#renderInfo(fps);
-
-        if (this.#debug) {
-            this.#renderDebug();
-        }
-    }
-
-    /**
-     * @param {number} fps Calculated frames per second (float)
-     */
-    #renderInfo(fps) {
-        const c = this.#ctx;
-
-        let infoParts = [Math.floor(fps) + ' fps'];
-
-        const fontSize = this.#cellHeight * 0.5;
-        c.fillStyle = 'Gray';
-        c.font = `${fontSize}px monospace`;
-        c.fillText(infoParts.join(' · '), 2, fontSize);
-    }
-
-    #renderDebug() {
-        const c = this.#ctx;
-
-        c.fillStyle = 'Red';
-        c.fillText(JSON.stringify(this.#debug), 2, 30);
-    }
-
-    #renderPause() {
-        const c = this.#ctx;
-
-        const text = '♥︎ PAUSE ♥︎';
-        const fontSize = this.#cellHeight * 5;
-        const counter = Math.ceil(Date.now() / 400);
-
-        c.font = `${fontSize}px monospace`;
-
-        const metrics = c.measureText(text);
-        const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-        const x = this.#canvas.width / 2 - metrics.width / 2, y = this.#canvas.height / 2 + textHeight / 2;
-
-        c.lineWidth = fontSize * 0.02;
-
-        c.fillStyle = Writer.colorPalette[counter % Math.min(Writer.colorPalette.length, 4)];
-        c.fillText(text, x, y);
-        c.strokeStyle = 'black';
-        c.strokeText(text, x, y);
-
-        const distance = fontSize * 0.04;
-
-        c.fillStyle = 'black';
-        c.fillText(text, x - distance, y - distance);
-        c.strokeStyle = 'white';
-        c.strokeText(text, x - distance, y - distance);
-    }
-
-    #renderCells() {
-        const c = this.#ctx;
-
-        for (let row = 0; row < this.#rows; row++) {
-            for (let col = 0; col < this.#cols; col++) {
-                const cell = this.getCell(col, row);
-
-                // Background
-                c.beginPath();
-                c.rect(
-                    col * this.#cellWidth + this.#borderWidth/2, row * this.#cellHeight + this.#borderWidth/2,
-                    this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
-                );
-
-                let color = this.#globalStyle.backgroundColor;
-                let transparency = null;
-                if (cell.backgroundColor !== null) {
-                    color = cell.backgroundColor;
-                    if (cell.backgroundPulse) {
-                        transparency = this.#cycleVal;
-                    }
-                } else if (this.#globalStyle.backgroundPulse) {
-                    transparency = this.#cycleVal;
-                } else if (cell.afterglowCounter !== null) {
-                    color = cell.afterglowColor;
-                    transparency = Math.ceil(cell.afterglowCounter * .5);
-                }
-                c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
-                c.fill();
-
-                // Border
-                color = this.#globalStyle.borderColor;
-                transparency = null;
-                if (cell.borderColor !== null) {
-                    color = cell.borderColor;
-                    if (cell.borderPulse) {
-                        transparency = this.#cycleVal;
-                    }
-                } else if (this.#globalStyle.borderPulse) {
-                    transparency = this.#cycleVal;
-                }
-                c.strokeStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
-                c.lineWidth = this.#borderWidth;
-                c.stroke();
-
-                // Character
-                if (cell.character !== null) {
-                    const fontSize = this.#cellHeight * .6;
-                    color = this.#globalStyle.foregroundColor;
-                    transparency = null;
-                    if (cell.foregroundColor !== null) {
-                        color = cell.foregroundColor;
-                        if (cell.foregroundPulse) {
-                            transparency = this.#cycleVal;
-                        }
-                    } else if (this.#globalStyle.foregroundPulse) {
-                        transparency = this.#cycleVal;
-                    }
-                    c.fillStyle = color + (transparency !== null ? Writer.#to2DigitHex(transparency) : '');
-                    c.font = `bold ${fontSize}px monospace`;
-                    const metrics = c.measureText(cell.character);
-                    c.fillText(
-                        cell.character,
-                        col * this.#cellWidth + this.#cellWidth/2 + this.#borderWidth/2 - metrics.width / 2,
-                        row * this.#cellHeight + this.#cellHeight + this.#borderWidth/2 - fontSize / 2,
-                    );
-                }
-            }
-        }
-    }
-
-    #renderCursor() {
-        const c = this.#ctx;
-        const cursor = this.#cursor;
-        const col = cursor.col;
-        const row = cursor.row;
-
-        c.beginPath();
-        c.rect(
-            col * this.#cellWidth + this.#borderWidth/2, row * this.#cellHeight + this.#borderWidth/2,
-            this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
-        );
-
-        let color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-        c.fillStyle = color + Writer.#to2DigitHex(this.#cycleVal) /* transparency */;
-        c.fill();
-
-        c.lineWidth = this.#borderWidth;
-        c.strokeStyle = cursor.cell.borderColor + Writer.#to2DigitHex(this.#cycleVal) /* transparency */;
-        c.stroke();
     }
 
     /**
