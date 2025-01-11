@@ -124,7 +124,9 @@ export default class App {
         } else if (key === 'Pause') {
             writer.appState = 'pause';
         } else if (key === 'F5') {
-            writer.reset();
+            if (shiftKey) {
+                writer.reset();
+            }
         } else if (key.length === 1) {
             writer.character(key);
             if (this.#autoAdvance) {
@@ -187,7 +189,7 @@ export default class App {
             'Pause/Space  (Playback mode) Pause/Continue',
             '(CTRL)+Print Download screenshot',
             'SHIFT + F10  Download demo',
-            'F5           Reset',
+            'SHIFT + F5   Reset',
             // TODO: Toggle FPS/Debug
         ];
 
