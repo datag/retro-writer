@@ -5,6 +5,7 @@ import Cursor from './Cursor';
 import Instruction from './Instruction';
 
 export default class Writer {
+    /** @type {string[]} Color palette */
     static colorPalette = [
         '#ff0000', // Red
         '#00ff00', // Green
@@ -17,6 +18,20 @@ export default class Writer {
         '#eeeeee', // Almost white
         '#111111', // Almost black
     ];
+
+    /**
+     * @typedef {Object} DefaultColor
+     * @property {string} foreground     - Foreground color
+     * @property {string} background     - Background color
+     * @property {string} border         - Border color
+     */
+
+    /** @type {DefaultColor} */
+    static defaultColor = {
+        foreground: '#eeeeee',
+        background: '#111111',
+        border:     '#222222',
+    };
 
     /** @type {number} Number of columns */
     #cols;
@@ -114,9 +129,9 @@ export default class Writer {
         this.#cycleUp = true;
 
         this.#globalStyle = new Cell();
-        this.#globalStyle.foregroundColor = '#eeeeee';
-        this.#globalStyle.backgroundColor = '#111111';
-        this.#globalStyle.borderColor = '#222222';
+        this.#globalStyle.foregroundColor = Writer.defaultColor.foreground;
+        this.#globalStyle.backgroundColor = Writer.defaultColor.background;
+        this.#globalStyle.borderColor = Writer.defaultColor.border;
 
         this.#cursor = new Cursor();
     }
@@ -282,7 +297,7 @@ export default class Writer {
         const cell = this.getCell(col, row);
 
         if (color === null) {
-            color = '#eeeeee';
+            color = Writer.defaultColor.foreground;
         }
 
         cell.afterglowColor = color;
@@ -512,30 +527,27 @@ export default class Writer {
      * @param {?string} color
      */
     setColor(scope, target, color) {
-        const cell = scope === 'cursor' ? this.#cursor.cell : this.#globalStyle;
-
-        if (scope === 'global' && color === null) {
-            console.warn(`Not unsetting global color for ${target}`);
-            return;
-        }
+        const isCursorScope = scope === 'cursor';
+        const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
+        const useGivenColor = isCursorScope || color !== null;
 
         let mnemonic = null;
 
         if (target === 'foreground') {
-            cell.foregroundColor = color;
+            cell.foregroundColor = useGivenColor ? color : Writer.defaultColor.foreground;
             mnemonic = Instruction.cursorForegroundColor;
         } else if (target === 'background') {
-            cell.backgroundColor = color;
+            cell.backgroundColor = useGivenColor ? color : Writer.defaultColor.background;
             mnemonic = Instruction.cursorBackgroundColor;
         } else if (target === 'border') {
-            cell.borderColor = color;
+            cell.borderColor = useGivenColor ? color : Writer.defaultColor.border;
             mnemonic = Instruction.cursorBorderColor;
         } else {
             console.error(`Target '${target}' not implemented`);
             return;
         }
 
-        if (scope === 'global') {
+        if (!isCursorScope) {
             // Replace first character 'C' (cell) with 'G' (global)
             mnemonic = 'G' + mnemonic.slice(1);
         }
@@ -549,7 +561,8 @@ export default class Writer {
      * @param {boolean} enabled
      */
     setPulse(scope, target, enabled) {
-        const cell = scope === 'cursor' ? this.#cursor.cell : this.#globalStyle;
+        const isCursorScope = scope === 'cursor';
+        const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
 
         let mnemonic = null;
 
@@ -567,7 +580,7 @@ export default class Writer {
             return;
         }
 
-        if (scope === 'global') {
+        if (!isCursorScope) {
             // Replace first character 'C' (cell) with 'G' (global)
             mnemonic = 'G' + mnemonic.slice(1);
         }
