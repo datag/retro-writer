@@ -59,7 +59,7 @@ export default class App {
             return;
         }
 
-        if (!handled) {
+        if (!handled && !['Control', 'Shift', 'Alt', 'AltGraph'].includes(key)) {
             console.warn(`Unhandled key '${key}' (`
                 + `Shift:${shiftKey ? 'yes' : 'no'} `
                 + `Ctrl:${ctrlKey ? 'yes' : 'no'} `
