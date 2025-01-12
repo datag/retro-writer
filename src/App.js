@@ -46,11 +46,12 @@ export default class App {
 
         let handled = true;
 
-        if (key === 'PrintScreen') {
+        if (key === 'PrintScreen' || (ctrlKey && key === 'p')) {
             this.downloadScreenshot();
             handled = true;
         } else if (key === 'F5' && shiftKey) {
             writer.reset();
+            handled = true;
         } else if (appState === 'record') {
             handled = this.#handleAppStateRecordKey(event);
         } else if (appState === 'play') {
@@ -115,11 +116,7 @@ export default class App {
         } else if (key === 'F9') {
             this.#autoAdvance = !shiftKey;
         } else if (key === 'F10') {
-            if (!shiftKey) {
-                writer.play();
-            } else {
-                this.downloadDemo();
-            }
+            writer.play();
         } else if (key === 'Delete') {
             writer.clearCell();
         } else if (key === 'Backspace') {
@@ -132,6 +129,8 @@ export default class App {
             writer.appState = 'pause';
         } else if (ctrlKey && key === 'o') {
             this.openDemo();
+        } else if (ctrlKey && key === 's') {
+            this.downloadDemo();
         } else if (key.length === 1) {
             writer.character(key);
             if (this.#autoAdvance) {
@@ -198,23 +197,26 @@ export default class App {
     printHelp() {
         const help = [
             'Help:',
-            'F2           Select foreground   (SHIFT clears)',
-            'F3           Select background   (SHIFT clears)',
-            'F4           Select border       (SHIFT clears)',
-            'F6           Enable pulsating    (SHIFT disables)',
-            'F7           Select scope cursor (SHIFT select global)',
-            'F9           Enable auto advance (SHIFT disabled)',
-            'F10          Playback',
-            'CTRL + 0-9   Select color from palette',
-            'Cursor       Move around',
-            'Delete       Clear cell under cursor',
-            'Backspace    Retract cursor and clear cell under cursor',
-            'PageDown     Scroll without moving cursor',
-            'Pause/Space  (Playback mode) Pause/Continue',
-            '(CTRL)+Print Download screenshot',
-            'SHIFT + F10  Download demo',
-            'SHIFT + F5   Reset',
+            'F2                  Select foreground   (SHIFT clears)',
+            'F3                  Select background   (SHIFT clears)',
+            'F4                  Select border       (SHIFT clears)',
+            'F6                  Enable pulsating    (SHIFT disables)',
+            'F7                  Select scope cursor (SHIFT select global)',
+            'F9                  Enable auto advance (SHIFT disabled)',
+            'F10                 Playback',
+            'CTRL + 0-9          Select color from palette',
+            'Cursor              Move around',
+            '<character>         Writes character (and advances, if auto advance is enable)',
+            'Delete              Clear cell under cursor',
+            'Backspace           Retract cursor and clear cell under cursor',
+            'PageDown            Scroll without moving cursor',
+            'Pause/Space         Pause/Continue',
+            'CTRL + p / Print    Download screenshot',
+            'CTRL + s            Download demo',
+            'CTRL + o            Open demo (also via Drag & Drop)',
+            'SHIFT + F5          Reset',
             // TODO: Toggle FPS/Debug
+            '#play:<url>         Hash URL: Plays demo load external URL (CORS headers need to be set)',
         ];
 
         help.forEach((line) => console.info(line));
