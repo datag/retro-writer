@@ -150,7 +150,7 @@ export default class Writer {
         this.#screen.render(this);
 
         this.#lastTimestamp.run = timestamp;
-        requestAnimationFrame(this.mainLoop.bind(this));
+        requestAnimationFrame((timestamp) => this.mainLoop(timestamp));
     }
 
     get appState() {

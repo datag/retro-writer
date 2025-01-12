@@ -23,7 +23,7 @@ export default class App {
     constructor(canvas) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
-        window.addEventListener('keydown', this.#onKeyDown.bind(this));
+        window.addEventListener('keydown', (e) => this.#onKeyDown(e));
     }
 
     start() {
