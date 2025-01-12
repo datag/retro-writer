@@ -1,3 +1,5 @@
+import { DemoFormatInstruction, DemoFormatInstructionArgument } from './Demo';
+
 export default class Instruction {
     static cursorUp    = 'CUP';
     static cursorDown  = 'CDW';
@@ -23,26 +25,26 @@ export default class Instruction {
     static globalBackgroundPulse = 'GBP';
     static globalBorderPulse     = 'GDP';
 
+    mnemonic: string;
+    argument1: DemoFormatInstructionArgument;
+    argument2: DemoFormatInstructionArgument;
 
     /**
-     * @param {string} mnemonic Instruction mnemonic
-     * @param {null|string|number} argument1 First argument (depending on instruction)
-     * @param {null|string|number} argument2 Second argument (depending on instruction)
+     * @param mnemonic Instruction mnemonic
+     * @param argument1 First argument (depending on instruction)
+     * @param argument2 Second argument (depending on instruction)
      */
-    constructor(mnemonic, argument1 = null, argument2 = null) {
+    constructor(mnemonic: string, argument1: DemoFormatInstructionArgument = null, argument2: DemoFormatInstructionArgument = null) {
         this.mnemonic = mnemonic;
         this.argument1 = argument1;
         this.argument2 = argument2;
     }
 
-    /**
-     * @returns {string|*[]}
-     */
-    toData() {
+    toData(): DemoFormatInstruction {
         if (this.argument1 === null && this.argument2 === null) {
             return this.mnemonic;
         } else {
-            const data = [this.mnemonic];
+            const data: DemoFormatInstructionArgument[] = [this.mnemonic];
             if (this.argument2 !== null) {
                 data.push(this.argument1, this.argument2);
             } else {
@@ -52,10 +54,7 @@ export default class Instruction {
         }
     }
 
-    /**
-     * @param {string|*[]} data
-     */
-    static fromData(data) {
+    static fromData(data: DemoFormatInstruction) {
         if (typeof data === 'string') {
             return new Instruction(data);
         } else if (Array.isArray(data) && data.length > 0) {

@@ -1,11 +1,25 @@
 import Screen from './Screen';
-import Demo from './Demo';
+import { Demo, DemoFormat } from './Demo';
 import Cell from './Cell';
 import Cursor from './Cursor';
 import Instruction from './Instruction';
 
+interface DefaultColor {
+    foreground: string;
+    background: string;
+    border: string;
+}
+
+interface LastTimestamp {
+    run: number,
+    fps: number,
+    cycle: number,
+    afterglow: number,
+    playback: number,
+}
+
 export default class Writer {
-    /** @type {string[]} Color palette */
+    /** Color palette */
     static colorPalette = [
         '#ff0000', // Red
         '#00ff00', // Green
@@ -19,52 +33,32 @@ export default class Writer {
         '#111111', // Almost black
     ];
 
-    /**
-     * @typedef {Object} DefaultColor
-     * @property {string} foreground     - Foreground color
-     * @property {string} background     - Background color
-     * @property {string} border         - Border color
-     */
-
-    /** @type {DefaultColor} */
-    static defaultColor = {
+    /** Default color definitions */
+    static defaultColor: DefaultColor = {
         foreground: '#eeeeee',
         background: '#111111',
         border:     '#222222',
     };
 
-    /** @type {number} Number of columns */
-    #cols;
+    /** Number of columns */
+    #cols: number;
 
-    /** @type {number} Number of rows */
-    #rows;
+    /** Number of rows */
+    #rows: number;
 
-    /** @type {Screen} */
-    #screen;
+    #screen: Screen;
 
-    /** @type {Demo} */
-    #demo = new Demo();
+    #demo: Demo = new Demo();
 
-    /** @type {number} Speed between 0 and 1 (float) */
-    #speed = .5;
+    /** Speed between 0 and 1 (float) */
+    #speed: number = .5;
 
 
     // From here on properties to be set on init()...
 
-    /** @type {('record'|'play'|'pause'|'menu')} */
-    #appState;
+    #appState: ('record' | 'play' | 'pause' | 'menu');
 
-    /**
-     * @typedef {Object} LastTimestamp
-     * @property {number} run       - Last run
-     * @property {number} fps       - Last FPS calculation
-     * @property {number} cycle     - Last animation cycle
-     * @property {number} afterglow - Last afterglow effect
-     * @property {number} playback  - Last playback instruction
-     */
-
-    /** @type {LastTimestamp} */
-    #lastTimestamp = {
+    #lastTimestamp: LastTimestamp = {
         run: 0,
         fps: 0,
         cycle: 0,
@@ -72,36 +66,32 @@ export default class Writer {
         playback: 0,
     };
 
-    /** @type {?number} Frames per second since last calculation */
-    #fps;
+    /** Frames per second since last calculation */
+    #fps: number | null;
 
-    /** @type {*} */
-    #debug;
+    #debug: any;
 
-    /** @type {Cell[]} */
-    #cells;
+    #cells: Cell[];
 
-    /** @type {number} Cycle value between 0 and 255 */
-    #cycleVal;
+    /** Cycle value between 0 and 255 */
+    #cycleVal: number;
 
-    /** @type {bool} Cycle direction (up=true, down=false) */
-    #cycleUp;
+    /** Cycle direction (up=true, down=false) */
+    #cycleUp: boolean;
 
-    /** @type {Cell} */
-    #globalStyle = new Cell();
+    #globalStyle: Cell;
 
-    /** @type {Cursor} */
-    #cursor;
+    #cursor: Cursor;
 
 
     /**
-     * @param {HTMLCanvasElement} canvas
-     * @param {number} width Canvas width in px
-     * @param {number} height Canvas height in px
-     * @param {number} cols Number of columns
-     * @param {number} rows Number of rows
+     * @param canvas
+     * @param width Canvas width in px
+     * @param height Canvas height in px
+     * @param cols Number of columns
+     * @param rows Number of rows
      */
-    constructor(canvas, width, height, cols = 40, rows = 25) {
+    constructor(canvas: HTMLCanvasElement, width: number, height: number, cols: number = 40, rows: number = 25) {
         this.#cols = cols;
         this.#rows = rows;
 
@@ -113,7 +103,7 @@ export default class Writer {
     init() {
         this.#appState = 'record';
 
-        Object.keys(this.#lastTimestamp).forEach(key => this.#lastTimestamp[key] = 0);
+        Object.keys(this.#lastTimestamp).forEach(key => this.#lastTimestamp[key as keyof LastTimestamp] = 0);
         this.#lastTimestamp.fps = performance.now();    // Initialize with current TS to give FPS counter time to calculate
 
         this.#fps = null;
@@ -137,9 +127,9 @@ export default class Writer {
     }
 
     /**
-     * @param {number} timestamp Current timestamp
+     * Current timestamp
      */
-    mainLoop(timestamp) {
+    mainLoop(timestamp: number) {
         if (timestamp - this.#lastTimestamp.fps > 250) {
             const delta = (timestamp - this.#lastTimestamp.run) / 1000;
             this.#fps = 1 / delta;
@@ -190,7 +180,7 @@ export default class Writer {
         return this.#demo.export();
     }
 
-    importDemo(data) {
+    importDemo(data: DemoFormat) {
         return this.#demo.import(data);
     }
 
@@ -206,19 +196,14 @@ export default class Writer {
         this.#demo = new Demo();
     }
 
-    /**
-     * @param {number} col Column
-     * @param {number} row Row
-     * @returns {Cell}
-     */
-    getCell(col, row) {
+    getCell(col: number, row: number): Cell {
         return this.#cells[row * this.#cols + col];
     }
 
     /**
-     * @param {number} timestamp Current timestamp
+     * @param timestamp Current timestamp
      */
-    #update(timestamp) {
+    #update(timestamp: number) {
         const appState = this.#appState;
 
         if (appState === 'play') {
@@ -293,7 +278,7 @@ export default class Writer {
      * @param {?string} color Color to set
      * @param {number} counter Start value; Integer from 0 to 255
      */
-    #triggerAfterglow(col = this.#cursor.col, row = this.#cursor.row, color = this.#cursor.cell.backgroundColor, counter = this.#cycleVal) {
+    #triggerAfterglow(col: number = this.#cursor.col, row: number = this.#cursor.row, color: string | null = this.#cursor.cell.backgroundColor, counter: number = this.#cycleVal) {
         const cell = this.getCell(col, row);
 
         if (color === null) {
@@ -307,7 +292,7 @@ export default class Writer {
     /**
      * @param {Instruction} instruction
      */
-    #record(instruction) {
+    #record(instruction: Instruction) {
         if (this.#appState === 'record') {
             this.#demo.addInstruction(instruction);
         }
@@ -317,10 +302,22 @@ export default class Writer {
      * @param {Instruction} instruction
      * @returns {boolean} false if the should be no delay after this instruction (i.e. on character instruction).
      */
-    #executeInstruction(instruction) {
+    #executeInstruction(instruction: Instruction): boolean {
         const m = instruction.mnemonic;
         const a1 = instruction.argument1;
-        const a2 = instruction.argument2;
+        // const a2 = instruction.argument2;
+
+        const assertStringArg: (value: any) => asserts value is string = (value: any) => {
+            if (typeof value !== 'string') {
+                throw new Error('Expected type string for argument');
+            }
+        };
+
+        const assertBooleanArg: (value: any) => asserts value is boolean = (value: any) => {
+            if (typeof value !== 'boolean') {
+                throw new Error('Expected type boolean for argument');
+            }
+        };
 
         let delay = true;
 
@@ -339,33 +336,46 @@ export default class Writer {
         } else if (m === Instruction.retract) {
             this.retract();
         } else if (m === Instruction.character) {
+            assertStringArg(a1);
             this.character(a1);
             delay = false;
         } else if (m === Instruction.clearCell) {
             this.clearCell();
         } else if (m === Instruction.cursorForegroundColor) {
+            assertStringArg(a1);
             this.setColor('cursor', 'foreground', a1);
         } else if (m === Instruction.cursorBackgroundColor) {
+            assertStringArg(a1);
             this.setColor('cursor', 'background', a1);
         } else if (m === Instruction.cursorBorderColor) {
+            assertStringArg(a1);
             this.setColor('cursor', 'border', a1);
         } else if (m === Instruction.globalForegroundColor) {
+            assertStringArg(a1);
             this.setColor('global', 'foreground', a1);
         } else if (m === Instruction.globalBackgroundColor) {
+            assertStringArg(a1);
             this.setColor('global', 'background', a1);
         } else if (m === Instruction.globalBorderColor) {
+            assertStringArg(a1);
             this.setColor('global', 'border', a1);
         } else if (m === Instruction.cursorForegroundPulse) {
+            assertBooleanArg(a1);
             this.setPulse('cursor', 'foreground', a1);
         } else if (m === Instruction.cursorBackgroundPulse) {
+            assertBooleanArg(a1);
             this.setPulse('cursor', 'background', a1);
         } else if (m === Instruction.cursorBorderPulse) {
+            assertBooleanArg(a1);
             this.setPulse('cursor', 'border', a1);
         } else if (m === Instruction.globalForegroundPulse) {
+            assertBooleanArg(a1);
             this.setPulse('global', 'foreground', a1);
         } else if (m === Instruction.globalBackgroundPulse) {
+            assertBooleanArg(a1);
             this.setPulse('global', 'background', a1);
         } else if (m === Instruction.globalBorderPulse) {
+            assertBooleanArg(a1);
             this.setPulse('global', 'border', a1);
         } else {
             console.warn(`Instruction with mnemonic ${m} not handled`);
@@ -467,9 +477,9 @@ export default class Writer {
     }
 
     /**
-     * @returns {boolean} false if retract could not be performed (i.e. when at first row and first column).
+     * @returns false if retract could not be performed (i.e. when at first row and first column).
      */
-    retract() {
+    retract(): boolean {
         this.#record(new Instruction(Instruction.retract));
 
         const cursor = this.#cursor;
@@ -490,10 +500,7 @@ export default class Writer {
         return true;
     }
 
-    /**
-     * @param {string} character
-     */
-    character(character) {
+    character(character: string) {
         this.#record(new Instruction(Instruction.character, character));
 
         const cursor = this.#cursor;
@@ -521,12 +528,7 @@ export default class Writer {
         this.#cells[cursor.row * this.#cols + cursor.col] = new Cell();
     }
 
-    /**
-     * @param {('cursor'|'global')} scope
-     * @param {('foreground'|'background'|'border')} target
-     * @param {?string} color
-     */
-    setColor(scope, target, color) {
+    setColor(scope: ('cursor' | 'global'), target: ('foreground' | 'background' | 'border'), color: string | null) {
         const isCursorScope = scope === 'cursor';
         const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
         const useGivenColor = isCursorScope || color !== null;
@@ -555,12 +557,7 @@ export default class Writer {
         this.#record(new Instruction(mnemonic, color));
     }
 
-    /**
-     * @param {('cursor'|'global')} scope
-     * @param {('foreground'|'background'|'border')} target
-     * @param {boolean} enabled
-     */
-    setPulse(scope, target, enabled) {
+    setPulse(scope: ('cursor' | 'global'), target: ('foreground' | 'background' | 'border'), enabled: boolean) {
         const isCursorScope = scope === 'cursor';
         const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
 

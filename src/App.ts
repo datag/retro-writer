@@ -1,26 +1,23 @@
 import Writer from './Writer';
 
 export default class App {
-    /** @type string App version */
-    static appVersion = import.meta.env.VITE_PACKAGE_VERSION;
+    /** App version */
+    static appVersion: string = import.meta.env.VITE_PACKAGE_VERSION;
 
-    /** @type {Writer} The writer instance */
-    #writer;
+    /** The writer instance */
+    #writer: Writer;
 
-    /** @type {('cursor'|'global')} The current scope for applying color/pulse */
-    #colorScope = 'cursor';
+    /** The current scope for applying color/pulse */
+    #colorScope: ('cursor' | 'global') = 'cursor';
 
-    /** @type {('foreground'|'background'|'border')} The current target for applying color/pulse */
-    #colorTarget = 'background';
+    /** The current target for applying color/pulse */
+    #colorTarget: ('foreground' | 'background' | 'border') = 'background';
 
-    /** @type {boolean} Whether character input automatically advances cursor */
-    #autoAdvance = true;
+    /** Whether character input automatically advances cursor */
+    #autoAdvance: boolean = true;
 
 
-    /**
-     * @param {HTMLCanvasElement} canvas
-     */
-    constructor(canvas) {
+    constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
         window.addEventListener('keydown', (event) => this.#onKeyDown(event));
@@ -35,8 +32,7 @@ export default class App {
         this.#handleHashUrl();
     }
 
-    /** @param {KeyboardEvent} event */
-    #onKeyDown(event) {
+    #onKeyDown(event: KeyboardEvent) {
         const writer = this.#writer;
         const appState = writer.appState;
         const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
@@ -74,11 +70,11 @@ export default class App {
     }
 
     /**
-     * @returns {boolean} false if key has not been handled
+     * @returns false if key has not been handled
      */
-    #handleAppStateRecordKey(event) {
+    #handleAppStateRecordKey(event: KeyboardEvent): boolean {
         const writer = this.#writer;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey;
 
         if (ctrlKey && key >= '0' && key <= '9') {
             const color = Writer.colorPalette[(Number(key) + 9) % Writer.colorPalette.length];
@@ -144,11 +140,11 @@ export default class App {
     }
 
     /**
-     * @returns {boolean} false if key has not been handled
+     * @returns false if key has not been handled
      */
-    #handleAppStatePlayKey(event) {
+    #handleAppStatePlayKey(event: KeyboardEvent): boolean {
         const writer = this.#writer;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+        const key = event.key;
 
         if (key === 'Pause' || key === ' ') {
             writer.appState = 'pause';
@@ -160,11 +156,11 @@ export default class App {
     }
 
     /**
-     * @returns {boolean} false if key has not been handled
+     * @returns false if key has not been handled
      */
-    #handleAppStatePauseKey(event) {
+    #handleAppStatePauseKey(event: KeyboardEvent): boolean {
         const writer = this.#writer;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+        const key = event.key;
 
         if (key === 'Pause' || key === ' ') {
             writer.appState = 'play';
@@ -178,10 +174,10 @@ export default class App {
     /**
      * @param {DragEvent} event
      */
-    #onDrop(event) {
+    #onDrop(event: DragEvent) {
         event.preventDefault();
 
-        const files = event.dataTransfer.files;
+        const files = event.dataTransfer?.files ?? [];
 
         if (files.length == 0) {
             console.warn('No file has been dropped');
@@ -196,7 +192,7 @@ export default class App {
 
     printHelp() {
         const help = [
-            'Help:',
+            `RetroWriter ${App.appVersion} -- Help:`,
             'F2                  Select foreground   (SHIFT clears)',
             'F3                  Select background   (SHIFT clears)',
             'F4                  Select border       (SHIFT clears)',
@@ -251,16 +247,19 @@ export default class App {
         input.accept = '.json, application/json';
 
         /** @param {Event} event */
-        const handleChange = (event) => {
-            /** @type {HTMLInputElement} */
-            const target = event.target;
+        const handleChange = (event: Event) => {
+            if (!(event.target instanceof HTMLInputElement)) {
+                throw new Error('Expected HTMLInputElement');
+            }
+            const target: HTMLInputElement = event.target;
+            const files = target?.files ?? [];
 
-            if (target.files.length == 0) {
+            if (files.length == 0) {
                 console.warn('No file has been opened');
-            } else if (target.files.length > 1) {
+            } else if (files.length > 1) {
                 console.error('Opening multiple files a once is unsupported');
             } else {
-                this.#loadDemoFromFileObject(target.files[0]);
+                this.#loadDemoFromFileObject(files[0]);
             }
 
             input.removeEventListener('change', handleChange);
@@ -271,10 +270,7 @@ export default class App {
         input.click();
     }
 
-    /**
-     * @param {File} file
-     */
-    #loadDemoFromFileObject(file) {
+    #loadDemoFromFileObject(file: File) {
         try {
             if (file.type !== 'application/json') {
                 throw new Error(`Expected file of type 'application/json', got '${file.type}'`);
@@ -295,29 +291,35 @@ export default class App {
     /**
      * Handle hash URLs.
      * NOTE: GitHub Pages does not support rewrites so can only use a hash URL instead of a path.
-     * @param {string} hash
      */
-    #handleHashUrl(hash = document.location.hash) {
+    #handleHashUrl(hash: string = document.location.hash) {
         const matches = hash.match(/^#(?<action>play):(?<argument>.*)/);
 
         if (matches !== null) {
-            const action = matches.groups.action;
-            const argument = matches.groups.argument;
+            const action = matches.groups?.action ?? null;
+            const argument = matches.groups?.argument ?? null;
 
             console.log(`Hash URL: Action ${action} with argument ${argument}`);
 
-            if (action === 'play') {
-                fetch(argument)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        this.#writer.importDemo(data);
-                        this.#writer.play();
-                    })
-                    .catch((e) => {
-                        console.error(`Error loading demo from URL '${argument}'`, e);
-                    });
-            } else {
-                alert(`Unhandled action '${action}'`);
+            try {
+                if (action === 'play') {
+                    if (argument === null) {
+                        throw new Error(`Argument expected`);
+                    }
+                    fetch(argument)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            this.#writer.importDemo(data);
+                            this.#writer.play();
+                        })
+                        .catch((e) => {
+                            console.error(`Error loading demo from URL '${argument}'`, e);
+                        });
+                } else {
+                    throw new Error(`Unhandled hash URL action '${action}'`);
+                }
+            } catch (e) {
+                console.error('Error handling hash URL', e);
             }
         }
     }

@@ -1,41 +1,43 @@
 import Writer from './Writer';
 
 export default class Screen {
-    /** @type {HTMLCanvasElement} */
-    #canvas;
+    #canvas: HTMLCanvasElement;
 
-    /** @type {CanvasRenderingContext2D} */
-    #ctx;
+    #ctx: CanvasRenderingContext2D;
 
-    /** @type {number} Number of columns */
-    #cols;
+    /** Number of columns */
+    #cols: number;
 
-    /** @type {number} Number of rows */
-    #rows;
+    /** Number of rows */
+    #rows: number;
 
-    /** @type {number} */
-    #borderWidth = 2;
+    /** Width of cell border */
+    #borderWidth: number = 2;
 
-    /** @type {number} Calculated cell width */
-    #cellWidth;
+    /** Calculated cell width */
+    #cellWidth: number;
 
-    /** @type {number} Calculated cell height */
-    #cellHeight;
+    /** Calculated cell height */
+    #cellHeight: number;
 
     /**
-     * @param {HTMLCanvasElement} canvas
-     * @param {number} width Canvas width in px
-     * @param {number} height Canvas height in px
-     * @param {number} cols Number of columns
-     * @param {number} rows Number of rows
+     * @param canvas The canvas element
+     * @param width Canvas width in px
+     * @param height Canvas height in px
+     * @param cols Number of columns
+     * @param rows Number of rows
      */
-    constructor(canvas, width, height, cols, rows) {
+    constructor(canvas: HTMLCanvasElement, width: number, height: number, cols: number, rows: number) {
         this.#canvas = canvas;
 
         this.#canvas.width = width;
         this.#canvas.height = height;
 
-        this.#ctx = canvas.getContext('2d');
+        const canvasContext = canvas.getContext('2d');
+        if (canvasContext === null) {
+            throw new Error('Could not get 2D context for canvas');
+        }
+        this.#ctx = canvasContext;
 
         /** @type {number} */
         this.#cols = cols;
@@ -47,7 +49,7 @@ export default class Screen {
         this.#cellHeight = (this.#canvas.height - this.#borderWidth * 2) / this.#rows;
     }
 
-    static #to2DigitHex(value) {
+    static #to2DigitHex(value: number) {
         return value.toString(16).padStart(2, '0');
     }
 
@@ -55,10 +57,7 @@ export default class Screen {
         return this.#canvas;
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    render(writer) {
+    render(writer: Writer) {
         const c = this.#ctx;
 
         c.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
@@ -67,7 +66,7 @@ export default class Screen {
         this.#renderCursor(writer);
 
         if (writer.appState === 'pause') {
-            this.#renderPause(writer);
+            this.#renderPause();
         }
 
         this.#renderInfo(writer);
@@ -77,17 +76,14 @@ export default class Screen {
         }
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    #renderInfo(writer) {
+    #renderInfo(writer: Writer) {
         const c = this.#ctx;
         const fps = writer.fps;
 
         let infoParts = [];
 
         if (fps !== null) {
-            infoParts.push(Math.floor(writer.fps) + ' fps');
+            infoParts.push(Math.floor(fps) + ' fps');
         }
 
         if (infoParts.length) {
@@ -98,20 +94,14 @@ export default class Screen {
         }
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    #renderDebug(writer) {
+    #renderDebug(writer: Writer) {
         const c = this.#ctx;
 
         c.fillStyle = 'Red';
         c.fillText(JSON.stringify(writer.debug), 2, 30);
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    #renderPause(writer) {
+    #renderPause() {
         const c = this.#ctx;
 
         const text = '♥︎ PAUSE ♥︎';
@@ -139,10 +129,7 @@ export default class Screen {
         c.strokeText(text, x - distance, y - distance);
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    #renderCells(writer) {
+    #renderCells(writer: Writer) {
         const c = this.#ctx;
         const globalStyle = writer.globalStyle;
         const cycleVal = writer.cycleVal;
@@ -215,10 +202,7 @@ export default class Screen {
         }
     }
 
-    /**
-     * @param {Writer} writer
-     */
-    #renderCursor(writer) {
+    #renderCursor(writer: Writer) {
         const c = this.#ctx;
         const cursor = writer.cursor;
         const col = cursor.col;
