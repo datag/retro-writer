@@ -23,7 +23,10 @@ export default class App {
     constructor(canvas) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
-        window.addEventListener('keydown', (e) => this.#onKeyDown(e));
+        window.addEventListener('keydown', (event) => this.#onKeyDown(event));
+
+        window.addEventListener('dragover', (event) => event.preventDefault());
+        window.addEventListener('drop', (event) => this.#onDrop(event));
     }
 
     start() {
@@ -127,6 +130,8 @@ export default class App {
             writer.scroll();
         } else if (key === 'Pause') {
             writer.appState = 'pause';
+        } else if (ctrlKey && key === 'o') {
+            this.openDemo();
         } else if (key.length === 1) {
             writer.character(key);
             if (this.#autoAdvance) {
@@ -169,6 +174,25 @@ export default class App {
         }
 
         return true;
+    }
+
+    /**
+     * @param {DragEvent} event
+     */
+    #onDrop(event) {
+        event.preventDefault();
+
+        const files = event.dataTransfer.files;
+
+        if (files.length == 0) {
+            console.warn('No file has been dropped');
+            return;
+        } else if (files.length > 1) {
+            console.error('Dropping multiple files at once is unsupported');
+            return;
+        }
+
+        this.#loadDemoFromFileObject(files[0]);
     }
 
     printHelp() {
@@ -217,6 +241,53 @@ export default class App {
         a.click();
 
         URL.revokeObjectURL(url);
+    }
+
+    openDemo() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json, application/json';
+
+        /** @param {Event} event */
+        const handleChange = (event) => {
+            /** @type {HTMLInputElement} */
+            const target = event.target;
+
+            if (target.files.length == 0) {
+                console.warn('No file has been opened');
+            } else if (target.files.length > 1) {
+                console.error('Opening multiple files a once is unsupported');
+            } else {
+                this.#loadDemoFromFileObject(target.files[0]);
+            }
+
+            input.removeEventListener('change', handleChange);
+        };
+
+        input.addEventListener('change', handleChange);
+
+        input.click();
+    }
+
+    /**
+     * @param {File} file
+     */
+    #loadDemoFromFileObject(file) {
+        try {
+            if (file.type !== 'application/json') {
+                throw new Error(`Expected file of type 'application/json', got '${file.type}'`);
+            }
+
+            file.text()
+                .then((content) => {
+                    const data = JSON.parse(content);
+
+                    this.#writer.importDemo(data);
+                    this.#writer.play();
+                });
+        } catch (e) {
+            console.error(`Error loading demo from file '${file.name}'`, e);
+        }
     }
 
     /**
