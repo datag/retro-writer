@@ -71,10 +71,10 @@ export default class Demo {
      */
     export() {
         return {
+            magic: Demo.magic,
             header: {
-                magic: Demo.magic,
                 version: this.#version,
-                // TODO: name, settings, ...
+                // TODO: name, cols, rows, settings, ...
             },
             instructions: this.#instructions.map((instruction) => instruction.toData())
         };
@@ -84,11 +84,19 @@ export default class Demo {
      * @param {DemoFormat} data
      */
     import(data) {
-        if (data?.header.magic !== Demo.magic) {
-            throw new Error(`Invalid RetroWriter demo file data`);
+        if (data.magic !== Demo.magic) {
+            /**
+             * @deprecated 0.1.0 BC for previous structure; remove before 1.0.0
+             */
+            if (data.header?.magic !== Demo.magic) {
+                throw new Error('Invalid RetroWriter demo file data');
+            }
         }
 
         const header = data.header;
+        if (typeof header === 'undefined') {
+            throw new Error('Header missing');
+        }
 
         this.#version = header?.version;
 
