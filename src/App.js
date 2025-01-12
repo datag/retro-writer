@@ -34,16 +34,20 @@ export default class App {
 
     /** @param {KeyboardEvent} event */
     #onKeyDown(event) {
-        const appState = this.#writer.appState;
+        const writer = this.#writer;
+        const appState = writer.appState;
+        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
 
         // Omit browser default behavior for all keys
         event.preventDefault();
 
         let handled = true;
 
-        if (event.key === 'PrintScreen') {
+        if (key === 'PrintScreen') {
             this.downloadScreenshot();
             handled = true;
+        } else if (key === 'F5' && shiftKey) {
+            writer.reset();
         } else if (appState === 'record') {
             handled = this.#handleAppStateRecordKey(event);
         } else if (appState === 'play') {
@@ -56,10 +60,10 @@ export default class App {
         }
 
         if (!handled) {
-            console.warn(`Unhandled key '${event.key}' (`
-                + `Shift:${event.shiftKey ? 'yes' : 'no'} `
-                + `Ctrl:${event.ctrlKey ? 'yes' : 'no'} `
-                + `Alt:${event.altKey ? 'yes' : 'no'}) `
+            console.warn(`Unhandled key '${key}' (`
+                + `Shift:${shiftKey ? 'yes' : 'no'} `
+                + `Ctrl:${ctrlKey ? 'yes' : 'no'} `
+                + `Alt:${altKey ? 'yes' : 'no'}) `
                 + `in app state '${appState}'.`
             );
         }
@@ -123,10 +127,6 @@ export default class App {
             writer.scroll();
         } else if (key === 'Pause') {
             writer.appState = 'pause';
-        } else if (key === 'F5') {
-            if (shiftKey) {
-                writer.reset();
-            }
         } else if (key.length === 1) {
             writer.character(key);
             if (this.#autoAdvance) {
