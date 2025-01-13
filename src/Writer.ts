@@ -307,13 +307,6 @@ export default class Writer {
         const a1 = instruction.argument1;
         // const a2 = instruction.argument2;
 
-        const assertStringArg: (value: any) => asserts value is string = (value: any) => {
-            if (typeof value !== 'string') {
-                console.info('Last instruction:', instruction);
-                throw new Error('Expected type string for argument');
-            }
-        };
-
         const assertNullableStringArg: (value: any) => asserts value is (string | null) = (value: any) => {
             if (value !== null && typeof value !== 'string') {
                 console.info('Last instruction:', instruction);
@@ -345,8 +338,8 @@ export default class Writer {
         } else if (m === Instruction.retract) {
             this.retract();
         } else if (m === Instruction.character) {
-            assertStringArg(a1);
-            this.character(a1);
+            assertNullableStringArg(a1);    // NOTE: Space can be encoded as null
+            this.character(a1 ?? ' ');
             delay = false;
         } else if (m === Instruction.clearCell) {
             this.clearCell();
@@ -510,7 +503,8 @@ export default class Writer {
     }
 
     character(character: string) {
-        this.#record(new Instruction(Instruction.character, character));
+        const instructionCharacter = character !== ' ' ? character : null;
+        this.#record(new Instruction(Instruction.character, instructionCharacter));
 
         const cursor = this.#cursor;
         const col = cursor.col;
