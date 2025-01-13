@@ -309,12 +309,21 @@ export default class Writer {
 
         const assertStringArg: (value: any) => asserts value is string = (value: any) => {
             if (typeof value !== 'string') {
+                console.info('Last instruction:', instruction);
                 throw new Error('Expected type string for argument');
+            }
+        };
+
+        const assertNullableStringArg: (value: any) => asserts value is (string | null) = (value: any) => {
+            if (value !== null && typeof value !== 'string') {
+                console.info('Last instruction:', instruction);
+                throw new Error('Expected null or type string for argument');
             }
         };
 
         const assertBooleanArg: (value: any) => asserts value is boolean = (value: any) => {
             if (typeof value !== 'boolean') {
+                console.info('Last instruction:', instruction);
                 throw new Error('Expected type boolean for argument');
             }
         };
@@ -342,22 +351,22 @@ export default class Writer {
         } else if (m === Instruction.clearCell) {
             this.clearCell();
         } else if (m === Instruction.cursorForegroundColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('cursor', 'foreground', a1);
         } else if (m === Instruction.cursorBackgroundColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('cursor', 'background', a1);
         } else if (m === Instruction.cursorBorderColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('cursor', 'border', a1);
         } else if (m === Instruction.globalForegroundColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('global', 'foreground', a1);
         } else if (m === Instruction.globalBackgroundColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('global', 'background', a1);
         } else if (m === Instruction.globalBorderColor) {
-            assertStringArg(a1);
+            assertNullableStringArg(a1);
             this.setColor('global', 'border', a1);
         } else if (m === Instruction.cursorForegroundPulse) {
             assertBooleanArg(a1);

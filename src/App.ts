@@ -257,7 +257,7 @@ export default class App {
             if (files.length == 0) {
                 console.warn('No file has been opened');
             } else if (files.length > 1) {
-                console.error('Opening multiple files a once is unsupported');
+                console.error('Opening multiple files at once is unsupported');
             } else {
                 this.#loadDemoFromFileObject(files[0]);
             }
