@@ -30,9 +30,6 @@ export default class Screen {
     constructor(canvas: HTMLCanvasElement, width: number, height: number, cols: number, rows: number) {
         this.#canvas = canvas;
 
-        this.#canvas.width = width;
-        this.#canvas.height = height;
-
         const canvasContext = canvas.getContext('2d');
         if (canvasContext === null) {
             throw new Error('Could not get 2D context for canvas');
@@ -45,8 +42,19 @@ export default class Screen {
         /** @type {number} */
         this.#rows = rows;
 
+        this.resize(width, height);
+    }
+
+    resize(width: number, height: number) {
+        this.#canvas.width = width;
+        this.#canvas.height = height;
+
         this.#cellWidth = (this.#canvas.width - this.#borderWidth * 2) / this.#cols;
         this.#cellHeight = (this.#canvas.height - this.#borderWidth * 2) / this.#rows;
+
+        // if (this.#cellHeight >= this.#cellWidth * .75) {
+        //     this.#cellHeight = this.#cellWidth * .75;
+        // }
     }
 
     static #to2DigitHex(value: number) {

@@ -20,6 +20,8 @@ export default class App {
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
+        window.addEventListener('resize', (event) => this.#onResize(event));
+
         window.addEventListener('keydown', (event) => this.#onKeyDown(event));
 
         window.addEventListener('dragover', (event) => event.preventDefault());
@@ -30,6 +32,10 @@ export default class App {
         this.#writer.mainLoop(performance.now());
 
         this.#handleHashUrl();
+    }
+
+    #onResize(_event: Event) {
+        this.#writer.screen.resize(window.innerWidth, window.innerHeight);
     }
 
     #onKeyDown(event: KeyboardEvent) {

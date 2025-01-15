@@ -152,6 +152,10 @@ export default class Writer {
         this.#appState = state;
     }
 
+    get screen() {
+        return this.#screen;
+    }
+
     get cursor() {
         return this.#cursor;
     }
