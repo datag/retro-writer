@@ -36,13 +36,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'yarn'
+        cache: 'pnpm'
 
     - name: Install dependencies
-      run: yarn install
+      run: pnpm install
 
     - name: Build the project
-      run: yarn build --base=/${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}/
+      run: pnpm build --base=/${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}/
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

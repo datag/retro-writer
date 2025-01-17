@@ -8,11 +8,11 @@
 
 ## Dev setup
 
-Assuming we're using [Yarn](https://yarnpkg.com/).
+Assuming we're using [pnpm](https://pnpm.io/).
 
 ```shell
-yarn
-yarn dev
+pnpm install
+pnpm dev
 ```
 
 And then browse to http://localhost:5173/.
