@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <defs>
+        <style>
+            .cls-1 {
+                fill: #000;
+            }
+
+            .cls-2 {
+                fill: #fff;
+            }
+
+            .cls-3 {
+                fill: #f00;
+            }
+
+            .cls-4 {
+                fill: #00f;
+            }
+        </style>
+    </defs>
+    <path d="M0 0h512v512H0z" class="cls-1" />
+    <path d="M256 256h224v224H256z" class="cls-2">
+        <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite" />
+    </path>
+    <path d="M256 32h224v224H256z" class="cls-3" />
+    <path d="M32 32h224v224H32z" class="cls-4" />
+    <path
+        d="M224 128V64H64v160h32v-64h96v64h32v-64h-32v-32Zm-32 0H96V96h96ZM416 64v128h-32V64h-32v128h-32V64h-32v160h160V64h-32z"
+        class="cls-2" />
+</svg>
