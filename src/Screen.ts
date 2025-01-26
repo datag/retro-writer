@@ -224,6 +224,7 @@ export default class Screen {
         const col = cursor.col;
         const row = cursor.row;
         const cyclePercent = writer.cyclePercent;
+        const transparency = '7f';
         let color;
 
         c.beginPath();
@@ -233,13 +234,13 @@ export default class Screen {
         );
 
         color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-        c.fillStyle = Color.adjustLightness(color, cyclePercent, false);
+        c.fillStyle = Color.adjustLightness(color, cyclePercent, false) + transparency;
         c.fill();
 
         if (cursor.cell.borderColor !== null) {
             c.lineWidth = this.#borderWidth;
             color = cursor.cell.borderColor;
-            c.strokeStyle = Color.adjustLightness(color, cyclePercent, false);
+            c.strokeStyle = Color.adjustLightness(color, cyclePercent, false) + transparency;
             c.stroke();
         }
     }
