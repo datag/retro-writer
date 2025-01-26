@@ -32,6 +32,8 @@ export default class App {
     start() {
         this.#writer.mainLoop(performance.now());
 
+        this.#writer.renderDebugInfo = import.meta.env.DEV;
+
         this.#handleHashUrl();
     }
 
@@ -54,6 +56,9 @@ export default class App {
             handled = true;
         } else if (key === 'F5' && shiftKey) {
             writer.reset();
+            handled = true;
+        } else if (key === 'F12') {
+            writer.renderDebugInfo = !writer.renderDebugInfo;
             handled = true;
         } else if (appState === 'record') {
             handled = this.#handleAppStateRecordKey(event);
@@ -217,6 +222,7 @@ export default class App {
             'F7                  Select scope cursor (SHIFT select global)',
             'F9                  Enable auto advance (SHIFT disabled)',
             'F10                 Playback',
+            'F12                 Toggle debug info (default on in dev)',
             'CTRL + 0-9          Select color from palette',
             'Cursor              Move around',
             'SHIFT + Cursor      (Re)Paint current cell and move around',
@@ -229,7 +235,6 @@ export default class App {
             'CTRL + s            Download demo',
             'CTRL + o            Open demo (also via Drag & Drop)',
             'SHIFT + F5          Reset',
-            // TODO: Toggle FPS/Debug
             '#play:<url>         Hash URL: Plays demo loaded from external URL (CORS headers need to be set)',
             '#play-gist:<id>     Hash URL: Plays demo loaded from GitHub gist',
         ];

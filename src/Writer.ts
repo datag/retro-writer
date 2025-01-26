@@ -53,6 +53,9 @@ export default class Writer {
     /** Speed between 0 and 1 (float) */
     #speed: number = .5;
 
+    /** Whether to show FPS and debug data */
+    renderDebugInfo: boolean = false;
+
 
     // From here on properties to be set on init()...
 

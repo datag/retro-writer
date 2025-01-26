@@ -42,6 +42,7 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 | `F7`                     | Select scope cursor (SHIFT selects global)                           |
 | `F9`                     | Enable auto advance (SHIFT disables)                                 |
 | `F10`                    | Playback                                                              |
+| `F12`                    | Toggle debug info (default on in dev)                                 |
 | `CTRL + 0-9`             | Select color from palette                                             |
 | `Cursor`                 | Move around                                                          |
 | `SHIFT + Cursor`         | (Re)Paint current cell and move around                               |

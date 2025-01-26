@@ -77,10 +77,12 @@ export default class Screen {
             this.#renderPause();
         }
 
-        this.#renderInfo(writer);
+        if (writer.renderDebugInfo) {
+            this.#renderInfo(writer);
 
-        if (writer.debug) {
-            this.#renderDebug(writer);
+            if (writer.debug) {
+                this.#renderDebug(writer);
+            }
         }
     }
 
