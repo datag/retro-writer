@@ -1,4 +1,5 @@
 import Writer from './Writer';
+import Color from './Color';
 
 export default class Screen {
     #canvas: HTMLCanvasElement;
@@ -55,10 +56,6 @@ export default class Screen {
         // if (this.#cellHeight >= this.#cellWidth * .75) {
         //     this.#cellHeight = this.#cellWidth * .75;
         // }
-    }
-
-    static #to2DigitHex(value: number) {
-        return value.toString(16).padStart(2, '0');
     }
 
     get canvas() {
@@ -155,7 +152,7 @@ export default class Screen {
                     this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
                 );
 
-                let color = globalStyle.backgroundColor;
+                let color = globalStyle.backgroundColor ?? Writer.defaultColor.background;
                 let transparency = null;
                 if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
@@ -164,15 +161,18 @@ export default class Screen {
                     }
                 } else if (globalStyle.backgroundPulse) {
                     transparency = cycleVal;
-                } else if (cell.afterglowCounter !== null) {
+                } else if (cell.afterglowCounter !== null && cell.afterglowColor !== null) {
                     color = cell.afterglowColor;
                     transparency = Math.ceil(cell.afterglowCounter * .5);
                 }
-                c.fillStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
+                if (transparency !== null) {
+                    color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                }
+                c.fillStyle = color;
                 c.fill();
 
                 // Border
-                color = globalStyle.borderColor;
+                color = globalStyle.borderColor ?? Writer.defaultColor.border;
                 transparency = null;
                 if (cell.borderColor !== null) {
                     color = cell.borderColor;
@@ -182,14 +182,17 @@ export default class Screen {
                 } else if (globalStyle.borderPulse) {
                     transparency = cycleVal;
                 }
-                c.strokeStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
+                if (transparency !== null) {
+                    color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                }
+                c.strokeStyle = color;
                 c.lineWidth = this.#borderWidth;
                 c.stroke();
 
                 // Character
                 if (cell.character !== null) {
                     const fontSize = this.#cellHeight * .6;
-                    color = globalStyle.foregroundColor;
+                    color = globalStyle.foregroundColor ?? Writer.defaultColor.foreground;
                     transparency = null;
                     if (cell.foregroundColor !== null) {
                         color = cell.foregroundColor;
@@ -199,7 +202,10 @@ export default class Screen {
                     } else if (cell.foregroundPulse || globalStyle.foregroundPulse) {
                         transparency = cycleVal;
                     }
-                    c.fillStyle = color + (transparency !== null ? Screen.#to2DigitHex(transparency) : '');
+                    if (transparency !== null) {
+                        color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                    }
+                    c.fillStyle = color;
                     c.font = `bold ${fontSize}px monospace`;
                     const metrics = c.measureText(cell.character);
                     c.fillText(
@@ -217,6 +223,7 @@ export default class Screen {
         const cursor = writer.cursor;
         const col = cursor.col;
         const row = cursor.row;
+        let color;
 
         c.beginPath();
         c.rect(
@@ -224,12 +231,15 @@ export default class Screen {
             this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
         );
 
-        let color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-        c.fillStyle = color + Screen.#to2DigitHex(writer.cycleVal) /* transparency */;
+        color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
+        c.fillStyle = Color.adjustLightness(color, 100 * writer.cycleVal / 255);
         c.fill();
 
-        c.lineWidth = this.#borderWidth;
-        c.strokeStyle = cursor.cell.borderColor + Screen.#to2DigitHex(writer.cycleVal) /* transparency */;
-        c.stroke();
+        if (cursor.cell.borderColor !== null) {
+            c.lineWidth = this.#borderWidth;
+            color = cursor.cell.borderColor;
+            c.strokeStyle = Color.adjustLightness(color, 100 * writer.cycleVal / 255);
+            c.stroke();
+        }
     }
 }
