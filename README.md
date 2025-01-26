@@ -1,10 +1,12 @@
 # RetroWriter
 
-RetroWriter is a JavaScript-based app inspired by the "lettermaker" programs of the 1980s. These programs were text editors designed for creating "disk letters" (Diskettenbriefe), which were messages or announcements saved to disk and shared electronically before the era of email. Unlike plain text editors, lettermakers added personality to the messages with effects like animated text playback, blinking words, and colorful displays.
+<img src="public/logo.svg" width="150" alt="Logo" align="right">
+
+RetroWriter is a browser-based app inspired by the ["lettermaker"](https://www.c64-wiki.de/wiki/Lettermaker) programs of the 1980s. These programs were text editors designed for creating "disk letters" (Diskettenbriefe), which were messages or announcements saved to disk and shared electronically before the era of email. Unlike plain text editors, lettermakers added personality to the messages with effects like animated text playback, blinking words, and colorful displays.
 
 RetroWriter replicates this experience, allowing users to create retro-styled messages in a modern browser environment, complete with text effects and nostalgic visuals.
 
-<img src="public/logo.svg" width="250" alt="Logo">
+<img src="doc/img/retrowriter-demo.apng" alt="RetroWriter demo">
 
 ## Features
 
