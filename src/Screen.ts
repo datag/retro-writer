@@ -139,7 +139,7 @@ export default class Screen {
     #renderCells(writer: Writer) {
         const c = this.#ctx;
         const globalStyle = writer.globalStyle;
-        const cycleVal = writer.cycleVal;
+        const cyclePercent = writer.cyclePercent;
 
         for (let row = 0; row < this.#rows; row++) {
             for (let col = 0; col < this.#cols; col++) {
@@ -157,16 +157,16 @@ export default class Screen {
                 if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
                     if (cell.backgroundPulse) {
-                        transparency = cycleVal;
+                        transparency = cyclePercent;
                     }
                 } else if (globalStyle.backgroundPulse) {
-                    transparency = cycleVal;
+                    transparency = cyclePercent;
                 } else if (cell.afterglowCounter !== null && cell.afterglowColor !== null) {
                     color = cell.afterglowColor;
-                    transparency = Math.ceil(cell.afterglowCounter * .5);
+                    transparency = Math.ceil((100 * cell.afterglowCounter / Writer.cycleMax) * .25);
                 }
                 if (transparency !== null) {
-                    color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                    color = Color.adjustLightness(color, transparency, true);
                 }
                 c.fillStyle = color;
                 c.fill();
@@ -177,13 +177,13 @@ export default class Screen {
                 if (cell.borderColor !== null) {
                     color = cell.borderColor;
                     if (cell.borderPulse) {
-                        transparency = cycleVal;
+                        transparency = cyclePercent;
                     }
                 } else if (globalStyle.borderPulse) {
-                    transparency = cycleVal;
+                    transparency = cyclePercent;
                 }
                 if (transparency !== null) {
-                    color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                    color = Color.adjustLightness(color, transparency, true);
                 }
                 c.strokeStyle = color;
                 c.lineWidth = this.#borderWidth;
@@ -197,13 +197,13 @@ export default class Screen {
                     if (cell.foregroundColor !== null) {
                         color = cell.foregroundColor;
                         if (cell.foregroundPulse) {
-                            transparency = cycleVal;
+                            transparency = cyclePercent;
                         }
                     } else if (cell.foregroundPulse || globalStyle.foregroundPulse) {
-                        transparency = cycleVal;
+                        transparency = cyclePercent;
                     }
                     if (transparency !== null) {
-                        color = Color.adjustLightness(color, 50 * cycleVal / 255);
+                        color = Color.adjustLightness(color, transparency, true);
                     }
                     c.fillStyle = color;
                     c.font = `bold ${fontSize}px monospace`;
@@ -223,6 +223,7 @@ export default class Screen {
         const cursor = writer.cursor;
         const col = cursor.col;
         const row = cursor.row;
+        const cyclePercent = writer.cyclePercent;
         let color;
 
         c.beginPath();
@@ -232,13 +233,13 @@ export default class Screen {
         );
 
         color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-        c.fillStyle = Color.adjustLightness(color, 100 * writer.cycleVal / 255);
+        c.fillStyle = Color.adjustLightness(color, cyclePercent, false);
         c.fill();
 
         if (cursor.cell.borderColor !== null) {
             c.lineWidth = this.#borderWidth;
             color = cursor.cell.borderColor;
-            c.strokeStyle = Color.adjustLightness(color, 100 * writer.cycleVal / 255);
+            c.strokeStyle = Color.adjustLightness(color, cyclePercent, false);
             c.stroke();
         }
     }

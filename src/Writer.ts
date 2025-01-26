@@ -40,6 +40,9 @@ export default class Writer {
         border:     '#222222',
     };
 
+    /** Cycle maximum value */
+    static cycleMax = 255;
+
     /** Number of columns */
     #cols: number;
 
@@ -76,7 +79,7 @@ export default class Writer {
 
     #cells: Cell[];
 
-    /** Cycle value between 0 and 255 */
+    /** Cycle value between 0 and cycleMax */
     #cycleVal: number;
 
     /** Cycle direction (up=true, down=false) */
@@ -171,8 +174,8 @@ export default class Writer {
         return this.#fps;
     }
 
-    get cycleVal() {
-        return this.#cycleVal;
+    get cyclePercent() {
+        return 100 * this.#cycleVal / Writer.cycleMax;
     }
 
     get globalStyle() {
@@ -240,8 +243,8 @@ export default class Writer {
                 // TODO: Cycle with quadratic function instead of linear?
                 if (this.#cycleUp) {
                     this.#cycleVal += 10;
-                    if (this.#cycleVal >= 255) {
-                        this.#cycleVal = 255;
+                    if (this.#cycleVal >= Writer.cycleMax) {
+                        this.#cycleVal = Writer.cycleMax;
                         this.#cycleUp = false;
                     }
                 } else {
@@ -283,7 +286,7 @@ export default class Writer {
      * @param {number} col Column index
      * @param {number} row Row index
      * @param {?string} color Color to set
-     * @param {number} counter Start value; Integer from 0 to 255
+     * @param {number} counter Start value; Integer from 0 to cycleMax
      */
     #triggerAfterglow(col: number = this.#cursor.col, row: number = this.#cursor.row, color: string | null = this.#cursor.cell.backgroundColor, counter: number = this.#cycleVal) {
         const cell = this.getCell(col, row);
@@ -415,7 +418,7 @@ export default class Writer {
                     continue;
                 }
 
-                this.#triggerAfterglow(col, row + 1, cell.backgroundColor, cell.backgroundPulse ? this.#cycleVal : 255);
+                this.#triggerAfterglow(col, row + 1, cell.backgroundColor, cell.backgroundPulse ? this.#cycleVal : Writer.cycleMax);
             }
         }
     }

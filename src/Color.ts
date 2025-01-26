@@ -63,15 +63,27 @@ export default class Color {
         return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     }
 
-    /** Adjust a color (hex format) in lightness */
-    static adjustLightness(hexColor: string, lightnessPercent: number): string {
+    /**
+     * Adjust a color (hex format) in lightness
+     *
+     * @param hexColor Color in hex format #rrggbb.
+     * @param lightnessPercent Lightness in percent
+     * @param maxOriginal Whether to limit lightness to original color lightness
+     */
+    static adjustLightness(hexColor: string, lightnessPercent: number, maxOriginal: boolean = false): string {
         const r = parseInt(hexColor.slice(1, 3), 16);
         const g = parseInt(hexColor.slice(3, 5), 16);
         const b = parseInt(hexColor.slice(5, 7), 16);
 
         const hsl = Color.rgbToHsl(r, g, b);
 
-        hsl[2] = lightnessPercent;
+        // Adjust lightness
+        if (maxOriginal) {
+            // Limit to original color
+            hsl[2] = Math.min(lightnessPercent, hsl[2]);
+        } else {
+            hsl[2] = lightnessPercent;
+        }
 
         const [newR, newG, newB] = Color.hslToRgb(hsl[0], hsl[1], hsl[2]);
 
