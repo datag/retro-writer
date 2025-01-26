@@ -85,14 +85,22 @@ export default class App {
         if (ctrlKey && key >= '0' && key <= '9') {
             const color = Writer.colorPalette[(Number(key) + 9) % Writer.colorPalette.length];
             writer.setColor(this.#colorScope, this.#colorTarget, color);
-        } else if (key === 'ArrowUp') {
-            writer.cursorUp();
-        } else if (key === 'ArrowDown') {
-            writer.cursorDown();
-        } else if (key === 'ArrowLeft') {
-            writer.cursorLeft();
-        } else if (key === 'ArrowRight') {
-            writer.cursorRight();
+        } else if (key.startsWith('Arrow')) {
+            if (shiftKey) {
+                const cursor = writer.cursor;
+                const currentCell = writer.getCell(cursor.col, cursor.row);
+                writer.character(currentCell.character);
+            }
+
+            if (key === 'ArrowUp') {
+                writer.cursorUp();
+            } else if (key === 'ArrowDown') {
+                writer.cursorDown();
+            } else if (key === 'ArrowLeft') {
+                writer.cursorLeft();
+            } else if (key === 'ArrowRight') {
+                writer.cursorRight();
+            }
         } else if (key === 'F2') {
             if (!shiftKey) {
                 this.#colorTarget = 'foreground';
@@ -208,6 +216,7 @@ export default class App {
             'F10                 Playback',
             'CTRL + 0-9          Select color from palette',
             'Cursor              Move around',
+            'SHIFT + Cursor      (Re)Paint current cell and move around',
             '<character>         Writes character (and advances, if auto advance is enable)',
             'Delete              Clear cell under cursor',
             'Backspace           Retract cursor and clear cell under cursor',

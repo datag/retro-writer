@@ -342,8 +342,8 @@ export default class Writer {
         } else if (m === Instruction.retract) {
             this.retract();
         } else if (m === Instruction.character) {
-            assertNullableStringArg(a1);    // NOTE: Space can be encoded as null
-            this.character(a1 ?? ' ');
+            assertNullableStringArg(a1);    // NOTE: Space will be encoded as null
+            this.character(a1);
             delay = false;
         } else if (m === Instruction.clearCell) {
             this.clearCell();
@@ -506,7 +506,7 @@ export default class Writer {
         return true;
     }
 
-    character(character: string) {
+    character(character: string | null) {
         const instructionCharacter = character !== ' ' ? character : null;
         this.#record(new Instruction(Instruction.character, instructionCharacter));
 

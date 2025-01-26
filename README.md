@@ -40,6 +40,7 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 | `F10`                    | Playback                                                              |
 | `CTRL + 0-9`             | Select color from palette                                             |
 | `Cursor`                 | Move around                                                          |
+| `SHIFT + Cursor`         | (Re)Paint current cell and move around                               |
 | `<character>`            | Writes character (and advances, if auto advance is enabled)          |
 | `Delete`                 | Clear cell under cursor                                               |
 | `Backspace`              | Retract cursor and clear cell under cursor                            |
