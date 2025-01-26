@@ -2,11 +2,6 @@ import App from './App';
 import Instruction from './Instruction';
 
 interface DemoFormatHeader {
-    /**
-     * @deprecated 0.1.0 BC for previous structure; remove before 1.0.0
-     */
-    magic?: string;
-
     version: string;
 }
 
@@ -87,12 +82,7 @@ export class Demo {
 
     import(data: DemoFormat) {
         if (data.magic !== Demo.magic) {
-            /**
-             * @deprecated 0.1.0 BC for previous structure; remove before 1.0.0
-             */
-            if (data.header?.magic !== Demo.magic) {
-                throw new Error('Invalid RetroWriter demo file data');
-            }
+            throw new Error('Invalid RetroWriter demo file data');
         }
 
         const header = data.header;
