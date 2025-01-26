@@ -55,7 +55,8 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 
 ### Hash URLs
 
-* `#play:<url>`: Plays demo loaded from external URL (CORS headers required)
+* `#play:<url>`: Plays demo loaded from external URL (CORS headers required).
+* `#play-gist:<id>`: Plays demo loaded from GitHub gist.
 
 
 ## Dev setup

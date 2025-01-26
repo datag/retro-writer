@@ -15,6 +15,14 @@ export interface DemoFormat {
     instructions: DemoFormatInstruction[];
 }
 
+interface GistFileInfo {
+    filename: string,
+    language: string,
+    content: string,
+    raw_url: string,
+    truncated: boolean,
+}
+
 export class Demo {
     /** Identifier used in file format */
     static magic: string = 'RTRWRTR';
@@ -93,6 +101,53 @@ export class Demo {
         this.#version = header?.version;
 
         this.#instructions = data.instructions?.map((instruction: DemoFormatInstruction): Instruction => Instruction.fromData(instruction)) ?? [];
+    }
+
+    static async loadDemoFromFileObject(file: File): Promise<DemoFormat> {
+        if (file.type !== 'application/json') {
+            throw new Error(`Expected file of type 'application/json', got '${file.type}'`);
+        }
+
+        const content = await file.text();
+        return JSON.parse(content);
+    }
+
+    static async loadDemoFromUrl(url: string): Promise<DemoFormat> {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch demo from URL: ${response.statusText}`);
+        }
+
+        return await response.json();
+    }
+
+    static async loadDemoFromGist(gistId: string): Promise<DemoFormat> {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: {
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch gist: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        const filename = Object.keys(data.files)[0]; // Assume first file
+        const fileInfo: GistFileInfo = data.files[filename];
+
+        if (fileInfo.language !== 'JSON') {
+            throw new Error(`Expected gist content to be JSON`);
+        }
+
+        if (!fileInfo.truncated) {
+            return JSON.parse(fileInfo.content);
+        } else {
+            return Demo.loadDemoFromUrl(fileInfo.raw_url);
+        }
     }
 }
 

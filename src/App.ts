@@ -1,4 +1,5 @@
 import Writer from './Writer';
+import Demo from './Demo';
 
 export default class App {
     /** App version */
@@ -188,7 +189,7 @@ export default class App {
     /**
      * @param {DragEvent} event
      */
-    #onDrop(event: DragEvent) {
+    async #onDrop(event: DragEvent) {
         event.preventDefault();
 
         const files = event.dataTransfer?.files ?? [];
@@ -201,7 +202,9 @@ export default class App {
             return;
         }
 
-        this.#loadDemoFromFileObject(files[0]);
+        const data = await Demo.loadDemoFromFileObject(files[0]);
+        this.#writer.importDemo(data);
+        this.#writer.play();
     }
 
     printHelp() {
@@ -227,7 +230,8 @@ export default class App {
             'CTRL + o            Open demo (also via Drag & Drop)',
             'SHIFT + F5          Reset',
             // TODO: Toggle FPS/Debug
-            '#play:<url>         Hash URL: Plays demo load external URL (CORS headers need to be set)',
+            '#play:<url>         Hash URL: Plays demo loaded from external URL (CORS headers need to be set)',
+            '#play-gist:<id>     Hash URL: Plays demo loaded from GitHub gist',
         ];
 
         help.forEach((line) => console.info(line));
@@ -262,7 +266,7 @@ export default class App {
         input.accept = '.json, application/json';
 
         /** @param {Event} event */
-        const handleChange = (event: Event) => {
+        const handleChange = async (event: Event) => {
             if (!(event.target instanceof HTMLInputElement)) {
                 throw new Error('Expected HTMLInputElement');
             }
@@ -274,7 +278,9 @@ export default class App {
             } else if (files.length > 1) {
                 console.error('Opening multiple files at once is unsupported');
             } else {
-                this.#loadDemoFromFileObject(files[0]);
+                const data = await Demo.loadDemoFromFileObject(files[0]);
+                this.#writer.importDemo(data);
+                this.#writer.play();
             }
 
             input.removeEventListener('change', handleChange);
@@ -285,30 +291,12 @@ export default class App {
         input.click();
     }
 
-    #loadDemoFromFileObject(file: File) {
-        try {
-            if (file.type !== 'application/json') {
-                throw new Error(`Expected file of type 'application/json', got '${file.type}'`);
-            }
-
-            file.text()
-                .then((content) => {
-                    const data = JSON.parse(content);
-
-                    this.#writer.importDemo(data);
-                    this.#writer.play();
-                });
-        } catch (e) {
-            console.error(`Error loading demo from file '${file.name}'`, e);
-        }
-    }
-
     /**
      * Handle hash URLs.
      * NOTE: GitHub Pages does not support rewrites so can only use a hash URL instead of a path.
      */
-    #handleHashUrl(hash: string = document.location.hash) {
-        const matches = hash.match(/^#(?<action>play):(?<argument>.*)/);
+    async #handleHashUrl(hash: string = document.location.hash) {
+        const matches = hash.match(/^#(?<action>.*?):(?<argument>.*)/);
 
         if (matches !== null) {
             const action = matches.groups?.action ?? null;
@@ -319,17 +307,18 @@ export default class App {
             try {
                 if (action === 'play') {
                     if (argument === null) {
-                        throw new Error(`Argument expected`);
+                        throw new Error(`Argument with URL expected`);
                     }
-                    fetch(argument)
-                        .then((response) => response.json())
-                        .then((data) => {
-                            this.#writer.importDemo(data);
-                            this.#writer.play();
-                        })
-                        .catch((e) => {
-                            console.error(`Error loading demo from URL '${argument}'`, e);
-                        });
+                    const data = await Demo.loadDemoFromUrl(argument);
+                    this.#writer.importDemo(data);
+                    this.#writer.play();
+                } else if (action === 'play-gist') {
+                    if (argument === null) {
+                        throw new Error(`Argument with gist ID expected`);
+                    }
+                    const data = await Demo.loadDemoFromGist(argument);
+                    this.#writer.importDemo(data);
+                    this.#writer.play();
                 } else {
                     throw new Error(`Unhandled hash URL action '${action}'`);
                 }
