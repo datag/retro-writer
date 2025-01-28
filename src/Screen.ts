@@ -158,7 +158,7 @@ export default class Screen {
                 let limitLightness = true;
                 if (currentCell) {
                     color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-                    transparency = cyclePercent;
+                    transparency = 100 - cyclePercent;  // Invert
                     limitLightness = false;
                 } else if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
@@ -183,7 +183,7 @@ export default class Screen {
                 limitLightness = true;
                 if (currentCell && cursor.cell.borderColor !== null) {
                     color = cursor.cell.borderColor;
-                    transparency = cyclePercent;
+                    transparency = 100 - cyclePercent;  // Invert
                     limitLightness = false;
                 } else if (cell.borderColor !== null) {
                     color = cell.borderColor;
@@ -205,9 +205,11 @@ export default class Screen {
                     const fontSize = this.#cellHeight * .6;
                     color = globalStyle.foregroundColor ?? Writer.defaultColor.foreground;
                     transparency = null;
+                    limitLightness = true;
                     if (col === cursor.col && row === cursor.row) {
                         color = cursor.cell.foregroundColor ?? Writer.defaultColor.foreground;
                         transparency = cyclePercent;
+                        limitLightness = false;
                     } else if (cell.foregroundColor !== null) {
                         color = cell.foregroundColor;
                         if (cell.foregroundPulse) {
@@ -217,7 +219,7 @@ export default class Screen {
                         transparency = cyclePercent;
                     }
                     if (transparency !== null) {
-                        color = Color.adjustLightness(color, transparency, true);
+                        color = Color.adjustLightness(color, transparency, limitLightness);
                     }
                     c.fillStyle = color;
                     c.font = `bold ${fontSize}px monospace`;
