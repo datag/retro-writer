@@ -168,6 +168,8 @@ export default class App {
 
         if (key === 'Pause' || key === ' ') {
             writer.appState = 'pause';
+        } else if (key === 'End') {
+            writer.toEnd();
         } else {
             return false;
         }
@@ -231,6 +233,7 @@ export default class App {
             'Backspace           Retract cursor and clear cell under cursor',
             'PageDown            Scroll without moving cursor',
             'Pause/Space         Pause/Continue',
+            'End                 (Playback mode) Skip to end',
             'CTRL + p / Print    Download screenshot',
             'CTRL + s            Download demo',
             'CTRL + o            Open demo (also via Drag & Drop)',

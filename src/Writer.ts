@@ -201,6 +201,21 @@ export default class Writer {
         this.#demo.resetInstructionIndex();
     }
 
+    toEnd() {
+        if (this.#appState !== 'play') {
+            return;
+        }
+
+        let instruction;
+
+        while ((instruction = this.#demo.nextInstruction()) !== null) {
+            this.#executeInstruction(instruction);
+        }
+
+        this.#appState = 'record';
+        console.info('Playback skipped to end, switched back to record state');
+    }
+
     reset() {
         this.init();
         this.#demo = new Demo();

@@ -51,6 +51,7 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 | `Backspace`              | Retract cursor and clear cell under cursor                            |
 | `PageDown`               | Scroll without moving cursor                                          |
 | `Pause/Space`            | Pause/Continue                                                       |
+| `End`                    | (Playback mode) Skip to end                                          |
 | `CTRL + P / Print`       | Download screenshot                                                  |
 | `CTRL + S`               | Download demo                                                        |
 | `CTRL + O`               | Open demo (also via Drag & Drop)                                      |
