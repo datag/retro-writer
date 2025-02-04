@@ -30,7 +30,9 @@ jobs:
 
     # https://github.com/actions/setup-node/issues/480#issuecomment-1915448139
     - name: Enable Corepack
-      run: corepack enable
+      run: |
+        corepack enable
+        corepack prepare pnpm@10.0.0 --activate
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
