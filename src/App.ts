@@ -27,6 +27,8 @@ export default class App {
 
         window.addEventListener('dragover', (event) => event.preventDefault());
         window.addEventListener('drop', (event) => this.#onDrop(event));
+
+        window.addEventListener('visibilitychange', (event) => this.#onVisibilityChange(event));
     }
 
     start() {
@@ -193,9 +195,6 @@ export default class App {
         return true;
     }
 
-    /**
-     * @param {DragEvent} event
-     */
     async #onDrop(event: DragEvent) {
         event.preventDefault();
 
@@ -212,6 +211,14 @@ export default class App {
         const data = await Demo.loadDemoFromFileObject(files[0]);
         this.#writer.importDemo(data);
         this.#writer.play();
+    }
+
+    #onVisibilityChange(_event: Event) {
+        const writer = this.#writer;
+
+        if (document.hidden && writer.appState === 'play') {
+            writer.appState = 'pause';
+        }
     }
 
     printHelp() {
