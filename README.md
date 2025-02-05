@@ -14,7 +14,8 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 
 ### Text Playback Effects
 - **Typewriter Effect:** Text is displayed character by character, emulating a typewriter.
-- **Cursor Animations:** Includes a blinking cursor that tracks input.
+- **Cursor Animations:** Includes a blinking cursor that tracks input. Also the cursor wraps from left to right and vice versa.
+- **Buffer scrolling:** Allows scrolling the content (by cursor down or by scroll key).
 
 ### Visual Enhancements
 - **Color Effects:** Apply color transitions and highlights to your text.
@@ -23,6 +24,7 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 ### Output & Sharing
 - **Save Messages:** Export your creations for future use or sharing.
 - **Browser-Based:** No installation required; works directly in your web browser.
+- **Load from URL and GitHub Gist**: Load a demo from URL or by Gist ID.
 
 ## Hosted App
 
