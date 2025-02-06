@@ -1,5 +1,5 @@
 import Screen from './Screen';
-import { Demo, DemoFormat } from './Demo';
+import { Demo, DemoFormat, DemoFormatInstructionArgument } from './Demo';
 import Cell from './Cell';
 import Cursor from './Cursor';
 import Instruction from './Instruction';
@@ -75,7 +75,7 @@ export default class Writer {
     /** Frames per second since last calculation */
     #fps: number | null;
 
-    #debug: any;
+    #debug: any;       // eslint-disable-line @typescript-eslint/no-explicit-any -- This can be in fact anything that is JSON-serializable
 
     #cells: Cell[];
 
@@ -332,14 +332,14 @@ export default class Writer {
         const a1 = instruction.argument1;
         // const a2 = instruction.argument2;
 
-        const assertNullableStringArg: (value: any) => asserts value is (string | null) = (value: any) => {
+        const assertNullableStringArg: (value: DemoFormatInstructionArgument) => asserts value is (string | null) = (value: DemoFormatInstructionArgument) => {
             if (value !== null && typeof value !== 'string') {
                 console.info('Last instruction:', instruction);
                 throw new Error('Expected null or type string for argument');
             }
         };
 
-        const assertBooleanArg: (value: any) => asserts value is boolean = (value: any) => {
+        const assertBooleanArg: (value: DemoFormatInstructionArgument) => asserts value is boolean = (value: DemoFormatInstructionArgument) => {
             if (typeof value !== 'boolean') {
                 console.info('Last instruction:', instruction);
                 throw new Error('Expected type boolean for argument');

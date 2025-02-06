@@ -86,7 +86,7 @@ export default class Screen {
         const c = this.#ctx;
         const fps = writer.fps;
 
-        let infoParts = [];
+        const infoParts = [];
 
         if (fps !== null) {
             infoParts.push(Math.floor(fps) + ' fps');

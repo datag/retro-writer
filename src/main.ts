@@ -13,7 +13,7 @@ app.start();
 
 
 declare global {
-    var app: App;
+    var app: App;    // eslint-disable-line no-var -- Required for exposing `app` to global.
 }
 
 globalThis.app = app;
