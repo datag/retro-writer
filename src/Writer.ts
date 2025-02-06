@@ -11,11 +11,11 @@ interface DefaultColor {
 }
 
 interface LastTimestamp {
-    run: number,
-    fps: number,
-    cycle: number,
-    afterglow: number,
-    playback: number,
+    run: number;
+    fps: number;
+    cycle: number;
+    afterglow: number;
+    playback: number;
 }
 
 export default class Writer {
@@ -37,7 +37,7 @@ export default class Writer {
     static defaultColor: DefaultColor = {
         foreground: '#eeeeee',
         background: '#111111',
-        border:     '#222222',
+        border: '#222222',
     };
 
     /** Cycle maximum value */
@@ -54,15 +54,14 @@ export default class Writer {
     #demo: Demo = new Demo();
 
     /** Speed between 0 and 1 (float) */
-    #speed: number = .5;
+    #speed: number = 0.5;
 
     /** Whether to show FPS and debug data */
     renderDebugInfo: boolean = false;
 
-
     // From here on properties to be set on init()...
 
-    #appState: ('record' | 'play' | 'pause' | 'menu');
+    #appState: 'record' | 'play' | 'pause' | 'menu';
 
     #lastTimestamp: LastTimestamp = {
         run: 0,
@@ -75,7 +74,7 @@ export default class Writer {
     /** Frames per second since last calculation */
     #fps: number | null;
 
-    #debug: any;       // eslint-disable-line @typescript-eslint/no-explicit-any -- This can be in fact anything that is JSON-serializable
+    #debug: any; // eslint-disable-line @typescript-eslint/no-explicit-any -- This can be in fact anything that is JSON-serializable
 
     #cells: Cell[];
 
@@ -88,7 +87,6 @@ export default class Writer {
     #globalStyle: Cell;
 
     #cursor: Cursor;
-
 
     /**
      * @param canvas
@@ -109,8 +107,8 @@ export default class Writer {
     init() {
         this.#appState = 'record';
 
-        Object.keys(this.#lastTimestamp).forEach(key => this.#lastTimestamp[key as keyof LastTimestamp] = 0);
-        this.#lastTimestamp.fps = performance.now();    // Initialize with current TS to give FPS counter time to calculate
+        Object.keys(this.#lastTimestamp).forEach((key) => (this.#lastTimestamp[key as keyof LastTimestamp] = 0));
+        this.#lastTimestamp.fps = performance.now(); // Initialize with current TS to give FPS counter time to calculate
 
         this.#fps = null;
 
@@ -175,7 +173,7 @@ export default class Writer {
     }
 
     get cyclePercent() {
-        return 100 * this.#cycleVal / Writer.cycleMax;
+        return (100 * this.#cycleVal) / Writer.cycleMax;
     }
 
     get globalStyle() {
@@ -282,7 +280,7 @@ export default class Writer {
                         const cell = this.getCell(col, row);
 
                         if (this.#globalStyle.backgroundPulse) {
-                            cell.afterglowCounter = null;       // reset any afterglow
+                            cell.afterglowCounter = null; // reset any afterglow
                         } else if (cell.afterglowCounter !== null) {
                             cell.afterglowCounter -= 5;
                             if (cell.afterglowCounter <= 0) {
@@ -303,7 +301,12 @@ export default class Writer {
      * @param {?string} color Color to set
      * @param {number} counter Start value; Integer from 0 to cycleMax
      */
-    #triggerAfterglow(col: number = this.#cursor.col, row: number = this.#cursor.row, color: string | null = this.#cursor.cell.backgroundColor, counter: number = this.#cycleVal) {
+    #triggerAfterglow(
+        col: number = this.#cursor.col,
+        row: number = this.#cursor.row,
+        color: string | null = this.#cursor.cell.backgroundColor,
+        counter: number = this.#cycleVal,
+    ) {
         const cell = this.getCell(col, row);
 
         if (color === null) {
@@ -332,14 +335,18 @@ export default class Writer {
         const a1 = instruction.argument1;
         // const a2 = instruction.argument2;
 
-        const assertNullableStringArg: (value: DemoFormatInstructionArgument) => asserts value is (string | null) = (value: DemoFormatInstructionArgument) => {
+        const assertNullableStringArg: (value: DemoFormatInstructionArgument) => asserts value is string | null = (
+            value: DemoFormatInstructionArgument,
+        ) => {
             if (value !== null && typeof value !== 'string') {
                 console.info('Last instruction:', instruction);
                 throw new Error('Expected null or type string for argument');
             }
         };
 
-        const assertBooleanArg: (value: DemoFormatInstructionArgument) => asserts value is boolean = (value: DemoFormatInstructionArgument) => {
+        const assertBooleanArg: (value: DemoFormatInstructionArgument) => asserts value is boolean = (
+            value: DemoFormatInstructionArgument,
+        ) => {
             if (typeof value !== 'boolean') {
                 console.info('Last instruction:', instruction);
                 throw new Error('Expected type boolean for argument');
@@ -363,7 +370,7 @@ export default class Writer {
         } else if (m === Instruction.retract) {
             this.retract();
         } else if (m === Instruction.character) {
-            assertNullableStringArg(a1);    // NOTE: Space will be encoded as null
+            assertNullableStringArg(a1); // NOTE: Space will be encoded as null
             this.character(a1);
             delay = false;
         } else if (m === Instruction.clearCell) {
@@ -433,7 +440,12 @@ export default class Writer {
                     continue;
                 }
 
-                this.#triggerAfterglow(col, row + 1, cell.backgroundColor, cell.backgroundPulse ? this.#cycleVal : Writer.cycleMax);
+                this.#triggerAfterglow(
+                    col,
+                    row + 1,
+                    cell.backgroundColor,
+                    cell.backgroundPulse ? this.#cycleVal : Writer.cycleMax,
+                );
             }
         }
     }
@@ -556,7 +568,7 @@ export default class Writer {
         this.#cells[cursor.row * this.#cols + cursor.col] = new Cell();
     }
 
-    setColor(scope: ('cursor' | 'global'), target: ('foreground' | 'background' | 'border'), color: string | null) {
+    setColor(scope: 'cursor' | 'global', target: 'foreground' | 'background' | 'border', color: string | null) {
         const isCursorScope = scope === 'cursor';
         const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
         const useGivenColor = isCursorScope || color !== null;
@@ -585,7 +597,7 @@ export default class Writer {
         this.#record(new Instruction(mnemonic, color));
     }
 
-    setPulse(scope: ('cursor' | 'global'), target: ('foreground' | 'background' | 'border'), enabled: boolean) {
+    setPulse(scope: 'cursor' | 'global', target: 'foreground' | 'background' | 'border', enabled: boolean) {
         const isCursorScope = scope === 'cursor';
         const cell = isCursorScope ? this.#cursor.cell : this.#globalStyle;
 

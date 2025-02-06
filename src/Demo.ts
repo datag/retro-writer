@@ -16,11 +16,11 @@ export interface DemoFormat {
 }
 
 interface GistFileInfo {
-    filename: string,
-    language: string,
-    content: string,
-    raw_url: string,
-    truncated: boolean,
+    filename: string;
+    language: string;
+    content: string;
+    raw_url: string;
+    truncated: boolean;
 }
 
 export class Demo {
@@ -84,7 +84,9 @@ export class Demo {
                 version: this.#version,
                 // TODO: name, cols, rows, settings, ...
             },
-            instructions: this.#instructions.map((instruction: Instruction): DemoFormatInstruction => instruction.toData())
+            instructions: this.#instructions.map(
+                (instruction: Instruction): DemoFormatInstruction => instruction.toData(),
+            ),
         };
     }
 
@@ -100,7 +102,10 @@ export class Demo {
 
         this.#version = header?.version;
 
-        this.#instructions = data.instructions?.map((instruction: DemoFormatInstruction): Instruction => Instruction.fromData(instruction)) ?? [];
+        this.#instructions =
+            data.instructions?.map(
+                (instruction: DemoFormatInstruction): Instruction => Instruction.fromData(instruction),
+            ) ?? [];
     }
 
     static async loadDemoFromFileObject(file: File): Promise<DemoFormat> {
@@ -125,7 +130,7 @@ export class Demo {
     static async loadDemoFromGist(gistId: string): Promise<DemoFormat> {
         const response = await fetch(`https://api.github.com/gists/${gistId}`, {
             headers: {
-                'Accept': 'application/vnd.github+json',
+                Accept: 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
             },
         });

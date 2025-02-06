@@ -1,29 +1,29 @@
 import { DemoFormatInstruction, DemoFormatInstructionArgument } from './Demo';
 
 export default class Instruction {
-    static cursorUp    = 'CUP';
-    static cursorDown  = 'CDW';
-    static cursorLeft  = 'CLF';
+    static cursorUp = 'CUP';
+    static cursorDown = 'CDW';
+    static cursorLeft = 'CLF';
     static cursorRight = 'CRT';
-    static scroll      = 'SCR';
-    static advance     = 'ADV';
-    static retract     = 'RCT';
-    static character   = 'CHR';
-    static clearCell   = 'CLR';
+    static scroll = 'SCR';
+    static advance = 'ADV';
+    static retract = 'RCT';
+    static character = 'CHR';
+    static clearCell = 'CLR';
 
     static cursorForegroundColor = 'CFC';
     static cursorBackgroundColor = 'CBC';
-    static cursorBorderColor     = 'CDC';
+    static cursorBorderColor = 'CDC';
     static cursorForegroundPulse = 'CFP';
     static cursorBackgroundPulse = 'CBP';
-    static cursorBorderPulse     = 'CDP';
+    static cursorBorderPulse = 'CDP';
 
     static globalForegroundColor = 'GFC';
     static globalBackgroundColor = 'GBC';
-    static globalBorderColor     = 'GDC';
+    static globalBorderColor = 'GDC';
     static globalForegroundPulse = 'GFP';
     static globalBackgroundPulse = 'GBP';
-    static globalBorderPulse     = 'GDP';
+    static globalBorderPulse = 'GDP';
 
     mnemonic: string;
     argument1: DemoFormatInstructionArgument;
@@ -34,7 +34,11 @@ export default class Instruction {
      * @param argument1 First argument (depending on instruction)
      * @param argument2 Second argument (depending on instruction)
      */
-    constructor(mnemonic: string, argument1: DemoFormatInstructionArgument = null, argument2: DemoFormatInstructionArgument = null) {
+    constructor(
+        mnemonic: string,
+        argument1: DemoFormatInstructionArgument = null,
+        argument2: DemoFormatInstructionArgument = null,
+    ) {
         this.mnemonic = mnemonic;
         this.argument1 = argument1;
         this.argument2 = argument2;
@@ -64,7 +68,9 @@ export default class Instruction {
             const [mnemonic, argument1 = null, argument2 = null] = data;
             return new Instruction(mnemonic, argument1, argument2);
         } else {
-            throw new Error(`Invalid instruction data: Expected string or array with at least one item as instruction data, got ${typeof data}`);
+            throw new Error(
+                `Invalid instruction data: Expected string or array with at least one item as instruction data, got ${typeof data}`,
+            );
         }
     }
 }

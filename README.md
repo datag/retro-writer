@@ -13,15 +13,18 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 ## Features
 
 ### Text Playback Effects
+
 - **Typewriter Effect:** Text is displayed character by character, emulating a typewriter.
 - **Cursor Animations:** Includes a blinking cursor that tracks input. Also the cursor wraps from left to right and vice versa.
 - **Buffer scrolling:** Allows scrolling the content (by cursor down or by scroll key).
 
 ### Visual Enhancements
+
 - **Color Effects:** Apply color transitions and highlights to your text.
 - **Blinking Words:** Highlight specific words or phrases with blinking animations.
 
 ### Output & Sharing
+
 - **Save Messages:** Export your creations for future use or sharing.
 - **Browser-Based:** No installation required; works directly in your web browser.
 - **Load from URL and GitHub Gist**: Load a demo from URL or by Gist ID.
@@ -32,38 +35,36 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 
 ## RetroWriter Help
 
-
 ### Keys
 
-| Key/Command               | Action                                                                 |
-|---------------------------|-----------------------------------------------------------------------|
-| `F2`                     | Select foreground (SHIFT clears)                                      |
-| `F3`                     | Select background (SHIFT clears)                                      |
-| `F4`                     | Select border (SHIFT clears)                                          |
-| `F6`                     | Enable pulsating (SHIFT disables)                                     |
-| `F7`                     | Select scope cursor (SHIFT selects global)                           |
-| `F9`                     | Enable auto advance (SHIFT disables)                                 |
-| `F10`                    | Playback                                                              |
-| `F12`                    | Toggle debug info (default on in dev)                                 |
-| `CTRL + 0-9`             | Select color from palette                                             |
-| `Cursor`                 | Move around                                                          |
-| `SHIFT + Cursor`         | (Re)Paint current cell and move around                               |
-| `<character>`            | Writes character (and advances, if auto advance is enabled)          |
-| `Delete`                 | Clear cell under cursor                                               |
-| `Backspace`              | Retract cursor and clear cell under cursor                            |
-| `PageDown`               | Scroll without moving cursor                                          |
-| `Pause/Space`            | Pause/Continue                                                       |
-| `End`                    | (Playback mode) Skip to end                                          |
-| `CTRL + P / Print`       | Download screenshot                                                  |
-| `CTRL + S`               | Download demo                                                        |
-| `CTRL + O`               | Open demo (also via Drag & Drop)                                      |
-| `SHIFT + F5`             | Reset                                                                |
+| Key/Command        | Action                                                      |
+| ------------------ | ----------------------------------------------------------- |
+| `F2`               | Select foreground (SHIFT clears)                            |
+| `F3`               | Select background (SHIFT clears)                            |
+| `F4`               | Select border (SHIFT clears)                                |
+| `F6`               | Enable pulsating (SHIFT disables)                           |
+| `F7`               | Select scope cursor (SHIFT selects global)                  |
+| `F9`               | Enable auto advance (SHIFT disables)                        |
+| `F10`              | Playback                                                    |
+| `F12`              | Toggle debug info (default on in dev)                       |
+| `CTRL + 0-9`       | Select color from palette                                   |
+| `Cursor`           | Move around                                                 |
+| `SHIFT + Cursor`   | (Re)Paint current cell and move around                      |
+| `<character>`      | Writes character (and advances, if auto advance is enabled) |
+| `Delete`           | Clear cell under cursor                                     |
+| `Backspace`        | Retract cursor and clear cell under cursor                  |
+| `PageDown`         | Scroll without moving cursor                                |
+| `Pause/Space`      | Pause/Continue                                              |
+| `End`              | (Playback mode) Skip to end                                 |
+| `CTRL + P / Print` | Download screenshot                                         |
+| `CTRL + S`         | Download demo                                               |
+| `CTRL + O`         | Open demo (also via Drag & Drop)                            |
+| `SHIFT + F5`       | Reset                                                       |
 
 ### Hash URLs
 
-* `#play:<url>`: Plays demo loaded from external URL (CORS headers required).
-* `#play-gist:<id>`: Plays demo loaded from GitHub gist.
-
+- `#play:<url>`: Plays demo loaded from external URL (CORS headers required).
+- `#play-gist:<id>`: Plays demo loaded from GitHub gist.
 
 ## Dev setup
 

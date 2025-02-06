@@ -9,14 +9,13 @@ export default class App {
     #writer: Writer;
 
     /** The current scope for applying color/pulse */
-    #colorScope: ('cursor' | 'global') = 'cursor';
+    #colorScope: 'cursor' | 'global' = 'cursor';
 
     /** The current target for applying color/pulse */
-    #colorTarget: ('foreground' | 'background' | 'border') = 'background';
+    #colorTarget: 'foreground' | 'background' | 'border' = 'background';
 
     /** Whether character input automatically advances cursor */
     #autoAdvance: boolean = true;
-
 
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
@@ -46,7 +45,10 @@ export default class App {
     #onKeyDown(event: KeyboardEvent) {
         const writer = this.#writer;
         const appState = writer.appState;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey, altKey = event.altKey;
+        const key = event.key,
+            ctrlKey = event.ctrlKey,
+            shiftKey = event.shiftKey,
+            altKey = event.altKey;
 
         // Omit browser default behavior for all keys
         event.preventDefault();
@@ -74,11 +76,12 @@ export default class App {
         }
 
         if (!handled && !['Control', 'Shift', 'Alt', 'AltGraph'].includes(key)) {
-            console.warn(`Unhandled key '${key}' (`
-                + `Shift:${shiftKey ? 'yes' : 'no'} `
-                + `Ctrl:${ctrlKey ? 'yes' : 'no'} `
-                + `Alt:${altKey ? 'yes' : 'no'}) `
-                + `in app state '${appState}'.`
+            console.warn(
+                `Unhandled key '${key}' (` +
+                    `Shift:${shiftKey ? 'yes' : 'no'} ` +
+                    `Ctrl:${ctrlKey ? 'yes' : 'no'} ` +
+                    `Alt:${altKey ? 'yes' : 'no'}) ` +
+                    `in app state '${appState}'.`,
             );
         }
     }
@@ -88,7 +91,9 @@ export default class App {
      */
     #handleAppStateRecordKey(event: KeyboardEvent): boolean {
         const writer = this.#writer;
-        const key = event.key, ctrlKey = event.ctrlKey, shiftKey = event.shiftKey;
+        const key = event.key,
+            ctrlKey = event.ctrlKey,
+            shiftKey = event.shiftKey;
 
         if (ctrlKey && key >= '0' && key <= '9') {
             const color = Writer.colorPalette[(Number(key) + 9) % Writer.colorPalette.length];

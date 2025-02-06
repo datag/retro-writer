@@ -1,13 +1,14 @@
-
 export default class Color {
     /** Convert RGB to HSL */
     static rgbToHsl(r: number, g: number, b: number): Array<number> {
         r /= 255;
         g /= 255;
         b /= 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const max = Math.max(r, g, b),
+            min = Math.min(r, g, b);
         const l = (max + min) / 2;
-        let h = 0, s;
+        let h = 0,
+            s;
 
         if (max === min) {
             h = s = 0; // achromatic
@@ -15,14 +16,20 @@ export default class Color {
             const d = max - min;
             s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
             switch (max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0);
+                    break;
+                case g:
+                    h = (b - r) / d + 2;
+                    break;
+                case b:
+                    h = (r - g) / d + 4;
+                    break;
             }
             h /= 6;
         }
         return [h * 360, s * 100, l * 100];
-    };
+    }
 
     /** Convert HSL back to RGB */
     static hslToRgb(h: number, s: number, l: number): Array<number> {
@@ -51,16 +58,11 @@ export default class Color {
             b = hueToRgb(p, q, h - 1 / 3);
         }
 
-        return [
-            Math.round(r * 255),
-            Math.round(g * 255),
-            Math.round(b * 255),
-        ];
-    };
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
 
     /** Convert RGB back to hex */
     static rgbToHex(r: number, g: number, b: number): string {
-
         return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
     }
 

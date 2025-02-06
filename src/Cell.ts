@@ -5,13 +5,11 @@ export default class Cell {
     /** Foreground pulse */
     foregroundPulse: boolean = false;
 
-
     /** Background color */
     backgroundColor: string | null = null;
 
     /** Background pulse */
     backgroundPulse: boolean = false;
-
 
     /** Border color */
     borderColor: string | null = null;
@@ -19,10 +17,8 @@ export default class Cell {
     /** Border pulse */
     borderPulse: boolean = false;
 
-
     /** Character/Symbol */
     character: string | null = null;
-
 
     /**
      * Afterglow color

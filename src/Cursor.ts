@@ -1,4 +1,4 @@
-import Cell from './Cell'
+import Cell from './Cell';
 
 export default class Cursor {
     /** 0-based column index */

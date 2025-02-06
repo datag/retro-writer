@@ -118,7 +118,8 @@ export default class Screen {
 
         const metrics = c.measureText(text);
         const textHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-        const x = this.#canvas.width / 2 - metrics.width / 2, y = this.#canvas.height / 2 + textHeight / 2;
+        const x = this.#canvas.width / 2 - metrics.width / 2,
+            y = this.#canvas.height / 2 + textHeight / 2;
 
         c.lineWidth = fontSize * 0.02;
 
@@ -149,16 +150,18 @@ export default class Screen {
                 // Background
                 c.beginPath();
                 c.rect(
-                    col * this.#cellWidth + this.#borderWidth/2, row * this.#cellHeight + this.#borderWidth/2,
-                    this.#cellWidth - this.#borderWidth, this.#cellHeight - this.#borderWidth
+                    col * this.#cellWidth + this.#borderWidth / 2,
+                    row * this.#cellHeight + this.#borderWidth / 2,
+                    this.#cellWidth - this.#borderWidth,
+                    this.#cellHeight - this.#borderWidth,
                 );
 
                 let color = globalStyle.backgroundColor ?? Writer.defaultColor.background;
                 let transparency = null;
                 let limitLightness = true;
                 if (currentCell) {
-                    color = cursor.cell.backgroundColor ?? '#aaaaaa';   // fallback color
-                    transparency = 100 - cyclePercent;  // Invert
+                    color = cursor.cell.backgroundColor ?? '#aaaaaa'; // fallback color
+                    transparency = 100 - cyclePercent; // Invert
                     limitLightness = false;
                 } else if (cell.backgroundColor !== null) {
                     color = cell.backgroundColor;
@@ -169,7 +172,7 @@ export default class Screen {
                     transparency = cyclePercent;
                 } else if (cell.afterglowCounter !== null && cell.afterglowColor !== null) {
                     color = cell.afterglowColor;
-                    transparency = Math.ceil((100 * cell.afterglowCounter / Writer.cycleMax) * .25);
+                    transparency = Math.ceil(((100 * cell.afterglowCounter) / Writer.cycleMax) * 0.25);
                 }
                 if (transparency !== null) {
                     color = Color.adjustLightness(color, transparency, limitLightness);
@@ -183,7 +186,7 @@ export default class Screen {
                 limitLightness = true;
                 if (currentCell && cursor.cell.borderColor !== null) {
                     color = cursor.cell.borderColor;
-                    transparency = 100 - cyclePercent;  // Invert
+                    transparency = 100 - cyclePercent; // Invert
                     limitLightness = false;
                 } else if (cell.borderColor !== null) {
                     color = cell.borderColor;
@@ -202,7 +205,7 @@ export default class Screen {
 
                 // Character
                 if (cell.character !== null) {
-                    const fontSize = this.#cellHeight * .6;
+                    const fontSize = this.#cellHeight * 0.6;
                     color = globalStyle.foregroundColor ?? Writer.defaultColor.foreground;
                     transparency = null;
                     limitLightness = true;
@@ -226,8 +229,8 @@ export default class Screen {
                     const metrics = c.measureText(cell.character);
                     c.fillText(
                         cell.character,
-                        col * this.#cellWidth + this.#cellWidth/2 + this.#borderWidth/2 - metrics.width / 2,
-                        row * this.#cellHeight + this.#cellHeight + this.#borderWidth/2 - fontSize / 2,
+                        col * this.#cellWidth + this.#cellWidth / 2 + this.#borderWidth / 2 - metrics.width / 2,
+                        row * this.#cellHeight + this.#cellHeight + this.#borderWidth / 2 - fontSize / 2,
                     );
                 }
             }
