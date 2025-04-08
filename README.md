@@ -33,6 +33,8 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 
 [Try It Out](https://datag.github.io/retro-writer/)
 
+[Watch the demo](https://datag.github.io/retro-writer/#play-gist:5661703f56040e691ea4274f455413c5)
+
 ## RetroWriter Help
 
 ### Keys
