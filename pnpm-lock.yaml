@@ -4,6 +4,10 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  brace-expansion@1: ^1.1.12
+  brace-expansion@2: ^2.0.2
+
 importers:
 
   .:
