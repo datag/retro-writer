@@ -1,3 +1,4 @@
+/* NOTE: These color helper functions were mainly AI generated */
 export default class Color {
     /** Convert RGB to HSL */
     static rgbToHsl(r: number, g: number, b: number): Array<number> {
