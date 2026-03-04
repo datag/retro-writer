@@ -11,3 +11,109 @@ canvas.writer {
     max-width: 100%;
     outline: solid 1px lightgray;
 }
+
+/* AI Dialog */
+.ai-dialog-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+}
+
+.ai-dialog {
+    background: #111111;
+    border: 2px solid #3399ff;
+    color: #eeeeee;
+    padding: 24px 28px;
+    min-width: 380px;
+    max-width: 480px;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ai-dialog h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: #3399ff;
+    letter-spacing: 0.05em;
+}
+
+.ai-dialog textarea,
+.ai-dialog input[type='password'],
+.ai-dialog input[type='text'] {
+    width: 100%;
+    box-sizing: border-box;
+    background: #222222;
+    border: 1px solid #3399ff;
+    color: #eeeeee;
+    font-family: monospace;
+    font-size: 0.9rem;
+    padding: 8px;
+    resize: vertical;
+}
+
+.ai-dialog textarea {
+    min-height: 80px;
+}
+
+.ai-dialog .ai-dialog-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ai-dialog button {
+    background: #3399ff;
+    border: none;
+    color: #111111;
+    font-family: monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+
+.ai-dialog button:disabled {
+    background: #444444;
+    color: #888888;
+    cursor: not-allowed;
+}
+
+.ai-dialog .ai-dialog-link {
+    background: none;
+    border: none;
+    color: #888888;
+    font-family: monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.ai-dialog .ai-dialog-link:hover {
+    color: #aaaaaa;
+}
+
+.ai-dialog .ai-dialog-status {
+    font-size: 0.85rem;
+    min-height: 1.2em;
+}
+
+.ai-dialog .ai-dialog-status.error {
+    color: #ff0000;
+}
+
+.ai-dialog .ai-dialog-status.info {
+    color: #888888;
+}
+
+.ai-dialog small {
+    color: #666666;
+    font-size: 0.75rem;
+}
