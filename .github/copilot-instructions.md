@@ -21,6 +21,7 @@ main.ts → App → Writer → Screen (canvas rendering)
                        → Demo  (serialization / playback)
                        → Cell[] (40×25 grid)
                        → Cursor
+        → AiDialog → AiGenerator → AiDsl (DSL compiler)
 ```
 
 **`Writer`** is the core. It owns the grid (`Cell[]`), the cursor, the demo recording, and the animation loop (`mainLoop` via `requestAnimationFrame`). It has three states: `'record'` | `'play'` | `'pause'`.
@@ -67,6 +68,17 @@ main.ts → App → Writer → Screen (canvas rendering)
 ```
 
 Demos can be loaded from: local file (drag-drop or file picker), URL (`#play:<url>`), or GitHub Gist (`#play-gist:<gistId>`).
+
+## AI Generate (CTRL+G)
+
+`CTRL+G` opens a floating dialog that sends a natural-language prompt to the OpenAI API and auto-plays the resulting demo.
+
+- **`AiDialog`** — HTML overlay UI; two views: API key entry (first launch) and prompt input. While open, canvas keyboard events are suppressed.
+- **`AiGenerator`** — builds system prompt, calls `https://api.openai.com/v1/chat/completions` (model: `gpt-4o`, `response_format: json_object`); API key stored in `localStorage` under `retrowriter.openai.api_key`
+- **`AiDsl`** — compiles the AI's JSON command array into a `DemoFormat`; tracks virtual cursor position during compilation. Does NOT import `App` (uses `import.meta.env.VITE_PACKAGE_VERSION` directly to avoid circular deps).
+
+**DSL command array format** (what the AI returns inside `{ "commands": [...] }`):
+`write`, `newline`, `move`, `color`, `globalColor`, `pulse`, `globalPulse`, `scroll` — see `docs/plans/2026-03-04-ai-generate-design.md` for full reference.
 
 ## Deployment
 
