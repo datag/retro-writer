@@ -2,8 +2,11 @@ import { DemoFormat } from './Demo';
 import AiDsl from './AiDsl';
 
 const LOCAL_STORAGE_KEY = 'retrowriter.openai.api_key';
+const LOCAL_STORAGE_MODEL_KEY = 'retrowriter.openai.model';
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o';
+
+export const AI_MODEL_PRESETS = ['gpt-4o', 'gpt-4o-mini', 'gpt-5.1', 'gpt-5.1-codex', 'gpt-5-mini'];
 
 const SYSTEM_PROMPT = `You are a generator for RetroWriter, a retro C64-style animated text demo tool.
 
@@ -80,7 +83,15 @@ export default class AiGenerator {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
 
-    static async generate(prompt: string): Promise<DemoFormat> {
+    static getModel(): string {
+        return localStorage.getItem(LOCAL_STORAGE_MODEL_KEY) ?? MODEL;
+    }
+
+    static saveModel(model: string) {
+        localStorage.setItem(LOCAL_STORAGE_MODEL_KEY, model.trim());
+    }
+
+    static async generate(prompt: string, model: string = AiGenerator.getModel()): Promise<DemoFormat> {
         const apiKey = AiGenerator.getApiKey();
         if (!apiKey) {
             throw new Error('No API key configured');
@@ -93,7 +104,7 @@ export default class AiGenerator {
                 Authorization: `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: MODEL,
+                model: model,
                 response_format: { type: 'json_object' },
                 temperature: 0.8,
                 messages: [
