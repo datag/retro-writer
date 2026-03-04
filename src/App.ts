@@ -1,5 +1,6 @@
 import Writer from './Writer';
 import Demo from './Demo';
+import AiDialog from './AiDialog';
 
 export default class App {
     /** App version */
@@ -17,8 +18,16 @@ export default class App {
     /** Whether character input automatically advances cursor */
     #autoAdvance: boolean = true;
 
+    /** The AI generate dialog */
+    #aiDialog: AiDialog;
+
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
+
+        this.#aiDialog = new AiDialog((data) => {
+            this.#writer.importDemo(data);
+            this.#writer.play();
+        });
 
         window.addEventListener('resize', (event) => this.#onResize(event));
 
@@ -43,6 +52,10 @@ export default class App {
     }
 
     #onKeyDown(event: KeyboardEvent) {
+        if (this.#aiDialog.isOpen) {
+            return;
+        }
+
         const writer = this.#writer;
         const appState = writer.appState;
         const key = event.key,
@@ -63,6 +76,9 @@ export default class App {
             handled = true;
         } else if (key === 'F12') {
             writer.renderDebugInfo = !writer.renderDebugInfo;
+            handled = true;
+        } else if (ctrlKey && key === 'g') {
+            this.#aiDialog.open();
             handled = true;
         } else if (appState === 'record') {
             handled = this.#handleAppStateRecordKey(event);
@@ -249,6 +265,7 @@ export default class App {
             'CTRL + p / Print    Download screenshot',
             'CTRL + s            Download demo',
             'CTRL + o            Open demo (also via Drag & Drop)',
+            'CTRL + G            AI generate demo',
             'SHIFT + F5          Reset',
             '#play:<url>         Hash URL: Plays demo loaded from external URL (CORS headers need to be set)',
             '#play-gist:<id>     Hash URL: Plays demo loaded from GitHub gist',
