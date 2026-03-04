@@ -29,6 +29,10 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 - **Browser-Based:** No installation required; works directly in your web browser.
 - **Load from URL and GitHub Gist**: Load a demo from URL or by Gist ID.
 
+### (optional) AI Generation
+
+- **AI Generate:** Describe the demo you want in natural language and let an AI model generate it for you. Requires an OpenAI-compatible API key (stored locally in the browser).
+
 ## Hosted App
 
 [Try It Out](https://datag.github.io/retro-writer/)
@@ -61,6 +65,7 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 | `CTRL + P / Print` | Download screenshot                                         |
 | `CTRL + S`         | Download demo                                               |
 | `CTRL + O`         | Open demo (also via Drag & Drop)                            |
+| `CTRL + G`         | AI generate demo                                            |
 | `SHIFT + F5`       | Reset                                                       |
 
 ### Hash URLs
