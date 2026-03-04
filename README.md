@@ -7,7 +7,7 @@ RetroWriter is a browser-based app inspired by the ["lettermaker"](https://www.c
 RetroWriter replicates this experience, allowing users to create retro-styled messages in a modern browser environment, complete with text effects and nostalgic visuals.
 
 <a href="https://datag.github.io/retro-writer/#play-gist:5661703f56040e691ea4274f455413c5" target="_blank">
-    <img src="doc/img/retrowriter-demo.apng" alt="RetroWriter demo">
+    <img src="docs/img/retrowriter-demo.apng" alt="RetroWriter demo">
 </a>
 
 ## Features
