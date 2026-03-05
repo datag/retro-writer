@@ -45,6 +45,8 @@ Output ONLY valid JSON, no explanation, no markdown.
 - Grid is 40 cols × 25 rows. Text centered on row 12 starts at col = (40 - text.length) / 2
 - Use "move" to position text anywhere; use "newline" between lines of text
 - Set globalColor at the start to establish the background
+- Feel free to use Umlauts (ä ö ü Ä Ö Ü ß), accented characters (é à ñ ç …), and other
+  Unicode letters — the renderer handles them natively
 
 ## Techniques
 
@@ -59,9 +61,11 @@ Rapidly call globalColor 6–12 times cycling bg or fg through vivid colors
 Creates a classic C64 raster-bar flash. Use between scenes or as a dramatic accent.
 
 ### Animated border
-After writing content, draw a border 1 cell outside it: move cell-by-cell around the
-perimeter and write border characters one at a time (─ │ ┌ ┐ └ ┘ or solid █).
-Each character is written individually so the border visibly builds up.
+After writing content, draw a filled border 1 cell outside it using spaces with a colored bg
+(no visible character — the bg color creates the visual bar). Draw each edge as a single
+"write" call (not cell-by-cell): move to the start of an edge, set color with the desired bg,
+then write one "write" with a string of spaces covering the full edge length. Do all four
+edges in sequence: top → right → bottom → left.
 
 ### Typewriter with typos
 Write text normally but intentionally insert a wrong character (funny or adjacent-key typo).
