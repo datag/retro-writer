@@ -172,6 +172,6 @@ export default class AiGenerator {
 
         const dsl = new AiDsl();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return dsl.compile(parsed.commands as any[]);
+        return dsl.compile(parsed.commands as any[], prompt, model);
     }
 }

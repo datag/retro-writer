@@ -22,7 +22,7 @@ export default class AiDsl {
     #cursorCol: number = 0;
     #cursorRow: number = 0;
 
-    compile(commands: DslCommand[]): DemoFormat {
+    compile(commands: DslCommand[], prompt?: string, model?: string): DemoFormat {
         this.#instructions = [];
         this.#cursorCol = 0;
         this.#cursorRow = 0;
@@ -31,9 +31,16 @@ export default class AiDsl {
             this.#dispatch(cmd);
         }
 
+        const header: { version: string; ai?: { prompt: string; model: string } } = {
+            version: import.meta.env.VITE_PACKAGE_VERSION ?? '0.0.0',
+        };
+        if (prompt !== undefined && model !== undefined) {
+            header.ai = { prompt, model };
+        }
+
         return {
             magic: Demo.magic,
-            header: { version: import.meta.env.VITE_PACKAGE_VERSION ?? '0.0.0' },
+            header,
             instructions: this.#instructions.map((i) => i.toData()),
         };
     }

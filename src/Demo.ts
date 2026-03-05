@@ -3,6 +3,7 @@ import Instruction from './Instruction';
 
 interface DemoFormatHeader {
     version: string;
+    ai?: { prompt: string; model: string };
 }
 
 export type DemoFormatInstructionArgument = null | string | number | boolean;
@@ -29,6 +30,7 @@ export class Demo {
 
     /** App version this demo was created with */
     #version: string = App.appVersion;
+    #ai: { prompt: string; model: string } | undefined = undefined;
 
     /** Sequential instructions */
     #instructions: Instruction[] = [];
@@ -82,6 +84,7 @@ export class Demo {
             magic: Demo.magic,
             header: {
                 version: this.#version,
+                ...(this.#ai ? { ai: this.#ai } : {}),
                 // TODO: name, cols, rows, settings, ...
             },
             instructions: this.#instructions.map(
@@ -101,6 +104,7 @@ export class Demo {
         }
 
         this.#version = header?.version;
+        this.#ai = header?.ai;
 
         this.#instructions =
             data.instructions?.map(
