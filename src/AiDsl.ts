@@ -6,6 +6,7 @@ interface DslCommand {
     text?: string;
     col?: number;
     row?: number;
+    count?: number;
     fg?: string | null;
     bg?: string | null;
     border?: string | null;
@@ -62,6 +63,9 @@ export default class AiDsl {
                 break;
             case 'scroll':
                 this.#scroll();
+                break;
+            case 'retract':
+                this.#retract(cmd.count ?? 1);
                 break;
             default:
                 console.warn(`AiDsl: unknown command '${cmd.fn}', skipping`);
@@ -203,5 +207,17 @@ export default class AiDsl {
 
     #scroll() {
         this.#instructions.push(new Instruction(Instruction.scroll));
+    }
+
+    #retract(count: number) {
+        for (let i = 0; i < count; i++) {
+            this.#instructions.push(new Instruction(Instruction.retract));
+            if (this.#cursorCol > 0) {
+                this.#cursorCol--;
+            } else if (this.#cursorRow > 0) {
+                this.#cursorCol = AiDsl.COLS - 1;
+                this.#cursorRow--;
+            }
+        }
     }
 }

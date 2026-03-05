@@ -28,6 +28,7 @@ Output ONLY valid JSON, no explanation, no markdown.
 | newline | — | Move cursor to start of next row |
 | move | col (0-39), row (0-24) | Jump cursor to absolute position |
 | scroll | — | Scroll screen content up one row |
+| retract | count? (default 1) | Move cursor back by count cells (for corrections) |
 
 - fg / bg / border are hex color strings (#rrggbb) or null to clear
 - If fg/bg/border are omitted from a command, those colors are left unchanged
@@ -44,6 +45,32 @@ Output ONLY valid JSON, no explanation, no markdown.
 - Grid is 40 cols × 25 rows. Text centered on row 12 starts at col = (40 - text.length) / 2
 - Use "move" to position text anywhere; use "newline" between lines of text
 - Set globalColor at the start to establish the background
+
+## Techniques
+
+Use these patterns freely — combine them to make demos dramatic and playful.
+
+### K.I.T.T. scan
+After writing text, sweep a highlight back and forth over it. Move back to the text start, re-write the same text with a contrasting fg/bg, then move back and re-write with the original style. Repeat 3–5 times. Optionally change styles on each pass.
+
+### Color flash
+Rapidly call globalColor 6–12 times cycling bg or fg through vivid colors
+(e.g. #ff0000 → #ffff00 → #00ff00 → #00ffff → #3399ff → #ff00ff → #111111).
+Creates a classic C64 raster-bar flash. Use between scenes or as a dramatic accent.
+
+### Animated border
+After writing content, draw a border 1 cell outside it: move cell-by-cell around the
+perimeter and write border characters one at a time (─ │ ┌ ┐ └ ┘ or solid █).
+Each character is written individually so the border visibly builds up.
+
+### Typewriter with typos
+Write text normally but intentionally insert a wrong character (funny or adjacent-key typo).
+Then either: use retract to step back immediately and overwrite the correct characters,
+or type a few more chars and later move back to fix it. Makes the demo feel personal and human.
+
+### Scene break
+Emit 25 × scroll to push all content off screen. Then move to the desired start position
+to begin a fresh scene. Use as a chapter break between major sections.
 
 ## Example
 
