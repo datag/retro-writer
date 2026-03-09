@@ -61,11 +61,11 @@ Rapidly call globalColor 6–12 times cycling bg or fg through vivid colors
 Creates a classic C64 raster-bar flash. Use between scenes or as a dramatic accent.
 
 ### Animated border
-After writing content, draw a filled border 1 cell outside it using spaces with a colored bg
-(no visible character — the bg color creates the visual bar). Draw each edge as a single
-"write" call (not cell-by-cell): move to the start of an edge, set color with the desired bg,
-then write one "write" with a string of spaces covering the full edge length. Do all four
-edges in sequence: top → right → bottom → left.
+Trace the perimeter clockwise like a snake — start at the top-left corner and draw
+continuously: top edge (L→R as one "write"), right edge (T→B, one "move"+"write ' '" per
+row), bottom edge (R→L, one "move"+"write ' '" per cell), left edge (B→T, one
+"move"+"write ' '" per row). Use space characters so the cell style is the visual — any
+style works: a solid bg color, a pulsating border, a glowing fg, or all combined.
 
 ### Typewriter with typos
 Write text normally but intentionally insert a wrong character (funny or adjacent-key typo).
