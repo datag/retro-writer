@@ -26,7 +26,7 @@ jobs:
 
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     # https://github.com/actions/setup-node/issues/480#issuecomment-1915448139
     - name: Enable Corepack
@@ -35,7 +35,7 @@ jobs:
         corepack prepare pnpm@10.0.0 --activate
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: '18'
         cache: 'pnpm'
@@ -47,7 +47,7 @@ jobs:
       run: pnpm build --base=/${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}/
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v4
       with:
         path: ./dist
 
