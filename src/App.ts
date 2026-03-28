@@ -1,6 +1,7 @@
 import Writer from './Writer';
 import Demo from './Demo';
 import AiDialog from './AiDialog';
+import SplashScreen from './SplashScreen';
 
 export default class App {
     /** App version */
@@ -21,6 +22,9 @@ export default class App {
     /** The AI generate dialog */
     #aiDialog: AiDialog;
 
+    /** The splash screen shown on first visit */
+    #splashScreen: SplashScreen;
+
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
@@ -28,6 +32,8 @@ export default class App {
             this.#writer.importDemo(data);
             this.#writer.play();
         });
+
+        this.#splashScreen = new SplashScreen();
 
         window.addEventListener('resize', (event) => this.#onResize(event));
 
@@ -44,7 +50,14 @@ export default class App {
 
         this.#writer.renderDebugInfo = import.meta.env.DEV;
 
-        this.#handleHashUrl();
+        if (!SplashScreen.hasBeenSeen) {
+            this.#splashScreen.open(() => {
+                SplashScreen.markSeen();
+                this.#handleHashUrl();
+            });
+        } else {
+            this.#handleHashUrl();
+        }
     }
 
     #onResize(_event: Event) {
@@ -52,7 +65,7 @@ export default class App {
     }
 
     #onKeyDown(event: KeyboardEvent) {
-        if (this.#aiDialog.isOpen) {
+        if (this.#splashScreen.isOpen || this.#aiDialog.isOpen) {
             return;
         }
 
@@ -75,6 +88,13 @@ export default class App {
 
         if (key === 'PrintScreen' || (ctrlKey && key === 'p')) {
             this.downloadScreenshot();
+            handled = true;
+        } else if (key === 'F1') {
+            const wasPlaying = writer.appState === 'play';
+            if (wasPlaying) writer.appState = 'pause';
+            this.#splashScreen.open(() => {
+                if (wasPlaying) writer.appState = 'play';
+            }, false);
             handled = true;
         } else if (key === 'F5' && shiftKey) {
             writer.reset();
@@ -250,6 +270,7 @@ export default class App {
     printHelp() {
         const help = [
             `RetroWriter ${App.appVersion} -- Help:`,
+            'F1                  Show shortcuts / help',
             'F2                  Select foreground   (SHIFT clears)',
             'F3                  Select background   (SHIFT clears)',
             'F4                  Select border       (SHIFT clears)',
