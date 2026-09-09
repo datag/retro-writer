@@ -137,7 +137,6 @@ export default class AiGenerator {
             body: JSON.stringify({
                 model: model,
                 response_format: { type: 'json_object' },
-                temperature: 0.8,
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
                     { role: 'user', content: prompt },
