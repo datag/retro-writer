@@ -33,6 +33,10 @@ RetroWriter replicates this experience, allowing users to create retro-styled me
 
 - **AI Generate:** Describe the demo you want in natural language and let an AI model generate it for you. Requires an OpenAI-compatible API key (stored locally in the browser).
 
+AI demos:
+
+- [demo #12 using gpt-6-astra](https://datag.github.io/retro-writer/#play-gist:8a6950a02f8693a981f2b3c3de6f2455)
+
 ## Hosted App
 
 [Try It Out](https://datag.github.io/retro-writer/)
