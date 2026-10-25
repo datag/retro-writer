@@ -113,6 +113,29 @@ canvas.writer {
     text-align: center;
 }
 
+.menu-contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.75rem;
+}
+
+.menu-link {
+    color: #3399ff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.menu-link:hover {
+    color: #66b3ff;
+}
+
+.menu-separator {
+    color: #555555;
+}
+
 /* AI Dialog */
 .ai-dialog-overlay {
     display: none;

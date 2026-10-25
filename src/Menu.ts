@@ -1,3 +1,5 @@
+import { appConfig, privacyPolicyUrl } from './AppConfig';
+
 const SEEN_KEY = 'retrowriter.menu.seen';
 const AUTO_DISMISS_MS = 5000;
 
@@ -28,6 +30,18 @@ const SHORTCUTS: [string, string][] = [
     ['#play:<url>', 'Hash URL: Play demo from URL'],
     ['#play-gist:<id>', 'Hash URL: Play demo from GitHub Gist'],
 ];
+
+/**
+ * Escapes a value so that it can be used in HTML markup.
+ */
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 export default class Menu {
     #overlay: HTMLDivElement;
@@ -61,6 +75,7 @@ export default class Menu {
             dismissed = true;
             clearTimeout(timer);
             window.removeEventListener('keydown', keyHandler);
+            this.#overlay.removeEventListener('click', clickHandler);
             this.#overlay.style.display = 'none';
             this.#overlay.innerHTML = '';
             onClose();
@@ -69,8 +84,45 @@ export default class Menu {
         const timer = autoDismiss ? setTimeout(dismiss, AUTO_DISMISS_MS) : -1;
         const keyHandler = () => dismiss();
 
+        // Clicks on links (contact mail, privacy policy) must not dismiss the menu
+        const clickHandler = (event: MouseEvent) => {
+            if (event.target instanceof HTMLElement && event.target.closest('a') !== null) {
+                return;
+            }
+
+            dismiss();
+        };
+
         window.addEventListener('keydown', keyHandler);
-        this.#overlay.addEventListener('click', dismiss, { once: true });
+        this.#overlay.addEventListener('click', clickHandler);
+    }
+
+    /**
+     * Renders the contact information (operator mail, privacy policy).
+     * @returns empty string if neither is configured
+     */
+    #renderContact(): string {
+        const mail = appConfig.operatorMail;
+        const policyUrl = privacyPolicyUrl();
+
+        if (mail === null && policyUrl === null) {
+            return '';
+        }
+
+        const links: string[] = [];
+
+        if (mail !== null) {
+            const address = escapeHtml(mail);
+            links.push(`<a class="menu-link" href="mailto:${address}">${address}</a>`);
+        }
+
+        if (policyUrl !== null) {
+            links.push(
+                `<a class="menu-link" href="${escapeHtml(policyUrl)}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>`,
+            );
+        }
+
+        return `<div class="menu-contact">${links.join('<span class="menu-separator">&middot;</span>')}</div>`;
     }
 
     #render(autoDismiss: boolean) {
@@ -84,6 +136,8 @@ export default class Menu {
 
         const hint = autoDismiss ? 'Press any key or click to continue' : 'Press any key or click to close';
 
+        const contact = this.#renderContact();
+
         this.#overlay.innerHTML = `
             <div class="menu-dialog">
                 <div class="menu-header">
@@ -95,6 +149,7 @@ export default class Menu {
                 </table>
                 <div class="menu-footer">
                     ${progressBar}
+                    ${contact}
                     <div class="menu-hint">${hint}</div>
                 </div>
             </div>
