@@ -87,8 +87,8 @@ export class Demo {
                 ...(this.#ai ? { ai: this.#ai } : {}),
                 // TODO: name, cols, rows, settings, ...
             },
-            instructions: this.#instructions.map(
-                (instruction: Instruction): DemoFormatInstruction => instruction.toData(),
+            instructions: this.#instructions.map((instruction: Instruction): DemoFormatInstruction =>
+                instruction.toData(),
             ),
         };
     }
@@ -107,8 +107,8 @@ export class Demo {
         this.#ai = header?.ai;
 
         this.#instructions =
-            data.instructions?.map(
-                (instruction: DemoFormatInstruction): Instruction => Instruction.fromData(instruction),
+            data.instructions?.map((instruction: DemoFormatInstruction): Instruction =>
+                Instruction.fromData(instruction),
             ) ?? [];
     }
 
