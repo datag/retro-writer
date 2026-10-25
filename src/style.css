@@ -84,29 +84,6 @@ canvas.writer {
     gap: 8px;
 }
 
-.menu-progress {
-    height: 2px;
-    background: #333333;
-    overflow: hidden;
-}
-
-.menu-progress-bar {
-    height: 100%;
-    background: #ffcc00;
-    width: 100%;
-    transform-origin: left;
-    animation: menu-countdown 5s linear forwards;
-}
-
-@keyframes menu-countdown {
-    from {
-        transform: scaleX(1);
-    }
-    to {
-        transform: scaleX(0);
-    }
-}
-
 .menu-hint {
     font-size: 0.75rem;
     color: #666666;

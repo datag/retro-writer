@@ -69,13 +69,12 @@ export default class App {
     /**
      * Opens the menu.
      * @param onClose called after the menu has been closed
-     * @param autoDismiss whether the menu closes automatically after a while
      */
-    #openMenu(onClose?: () => void, autoDismiss = true) {
+    #openMenu(onClose?: () => void) {
         this.#menu.open(() => {
             Menu.markSeen();
             onClose?.();
-        }, autoDismiss);
+        });
     }
 
     /**
@@ -119,7 +118,7 @@ export default class App {
             if (wasPlaying) writer.appState = 'pause';
             this.#openMenu(() => {
                 if (wasPlaying) writer.appState = 'play';
-            }, false);
+            });
             handled = true;
         } else if (key === 'F5' && shiftKey) {
             writer.reset();

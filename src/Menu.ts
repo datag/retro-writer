@@ -1,10 +1,12 @@
 import { appConfig, privacyPolicyUrl } from './AppConfig';
 
 const SEEN_KEY = 'retrowriter.menu.seen';
-const AUTO_DISMISS_MS = 5000;
 
 /** Values of the seen flag that mark the menu as seen */
 const SEEN_VALUES = ['1', 'true', 'yes', 'on'];
+
+/** Keys that don't dismiss the menu when pressed on their own */
+const MODIFIER_KEYS = ['Shift', 'Control', 'Alt', 'AltGraph', 'Meta', 'CapsLock'];
 
 const SHORTCUTS: [string, string][] = [
     ['F1', 'Show shortcuts / help'],
@@ -104,8 +106,8 @@ export default class Menu {
         return this.#overlay.style.display === 'flex';
     }
 
-    open(onClose: () => void, autoDismiss = true) {
-        this.#render(autoDismiss);
+    open(onClose: () => void) {
+        this.#render();
         this.#overlay.style.display = 'flex';
 
         let dismissed = false;
@@ -113,28 +115,31 @@ export default class Menu {
         const dismiss = () => {
             if (dismissed) return;
             dismissed = true;
-            clearTimeout(timer);
             window.removeEventListener('keydown', keyHandler);
-            this.#overlay.removeEventListener('click', clickHandler);
             this.#overlay.style.display = 'none';
             this.#overlay.innerHTML = '';
             onClose();
         };
 
-        const timer = autoDismiss ? setTimeout(dismiss, AUTO_DISMISS_MS) : -1;
-        const keyHandler = () => dismiss();
-
-        // Clicks on links (contact mail, privacy policy) must not dismiss the menu
-        const clickHandler = (event: MouseEvent) => {
-            if (event.target instanceof HTMLElement && event.target.closest('a') !== null) {
+        const keyHandler = (event: KeyboardEvent) => {
+            // Modifier keys alone don't dismiss the menu
+            if (MODIFIER_KEYS.includes(event.key)) {
                 return;
+            }
+
+            // Keep the browser's own default behavior for the developer tools
+            const isDevToolsShortcut =
+                event.key === 'F12' ||
+                (event.ctrlKey && event.shiftKey && ['KeyI', 'KeyJ', 'KeyC'].includes(event.code));
+
+            if (!isDevToolsShortcut) {
+                event.preventDefault();
             }
 
             dismiss();
         };
 
         window.addEventListener('keydown', keyHandler);
-        this.#overlay.addEventListener('click', clickHandler);
     }
 
     /**
@@ -165,16 +170,12 @@ export default class Menu {
         return `<div class="menu-contact">${links.join('<span class="menu-separator">&middot;</span>')}</div>`;
     }
 
-    #render(autoDismiss: boolean) {
+    #render() {
         const version = import.meta.env.VITE_PACKAGE_VERSION as string;
 
         const shortcutRows = SHORTCUTS.map(
             ([key, desc]) => `<tr><td class="menu-key">${key}</td><td class="menu-desc">${desc}</td></tr>`,
         ).join('');
-
-        const progressBar = autoDismiss ? `<div class="menu-progress"><div class="menu-progress-bar"></div></div>` : '';
-
-        const hint = autoDismiss ? 'Press any key or click to continue' : 'Press any key or click to close';
 
         const contact = this.#renderContact();
 
@@ -188,9 +189,8 @@ export default class Menu {
                     <tbody>${shortcutRows}</tbody>
                 </table>
                 <div class="menu-footer">
-                    ${progressBar}
                     ${contact}
-                    <div class="menu-hint">${hint}</div>
+                    <div class="menu-hint">Press any key to close</div>
                 </div>
             </div>
         `;
