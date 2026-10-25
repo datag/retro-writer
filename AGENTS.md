@@ -1,4 +1,4 @@
-# RetroWriter – Copilot Instructions
+# RetroWriter – Agent Instructions
 
 Browser-based retro text editor inspired by 1980s "lettermaker" programs. Built with TypeScript + Vite, renders entirely on an HTML5 `<canvas>`.
 
