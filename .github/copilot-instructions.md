@@ -68,6 +68,8 @@ main.ts → App → Writer → Screen (canvas rendering)
 }
 ```
 
+The `0.1.0` in the example above is just an example value - it is **not** the current app version. The `header.version` of a newly created demo must be the current app version, taken from `package.json` (`version`) and exposed to the app as `import.meta.env.VITE_PACKAGE_VERSION` / `App.appVersion`. Whenever the app version is bumped, new demos must use the new version. Demos that already exist keep the version they were created with.
+
 Demos can be loaded from: local file (drag-drop or file picker), URL (`#play:<url>`), or GitHub Gist (`#play-gist:<gistId>`).
 
 ## AI Generate (CTRL+G)
