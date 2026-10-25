@@ -63,7 +63,12 @@ export default class App {
             shiftKey = event.shiftKey,
             altKey = event.altKey;
 
-        // Omit browser default behavior for all keys
+        // Keep the browser's own default behavior for F12 (e.g. toggling the DevTools)
+        if (key === 'F12') {
+            return;
+        }
+
+        // Omit browser default behavior for all other keys
         event.preventDefault();
 
         let handled = true;
@@ -74,7 +79,7 @@ export default class App {
         } else if (key === 'F5' && shiftKey) {
             writer.reset();
             handled = true;
-        } else if (key === 'F12') {
+        } else if (ctrlKey && shiftKey && event.code === 'KeyF') {
             writer.renderDebugInfo = !writer.renderDebugInfo;
             handled = true;
         } else if (ctrlKey && key === 'g') {
@@ -252,7 +257,6 @@ export default class App {
             'F7                  Select scope cursor (SHIFT select global)',
             'F9                  Enable auto advance (SHIFT disabled)',
             'F10                 Playback',
-            'F12                 Toggle debug info (default on in dev)',
             'CTRL + 0-9          Select color from palette',
             'Cursor              Move around',
             'SHIFT + Cursor      (Re)Paint current cell and move around',
@@ -266,6 +270,7 @@ export default class App {
             'CTRL + S            Download demo',
             'CTRL + O            Open demo (also via Drag & Drop)',
             'CTRL + G            AI generate demo',
+            'CTRL + SHIFT + F     Toggle debug info (default on in dev)',
             'SHIFT + F5          Reset',
             '#play:<url>         Hash URL: Plays demo loaded from external URL (CORS headers need to be set)',
             '#play-gist:<id>     Hash URL: Plays demo loaded from GitHub gist',

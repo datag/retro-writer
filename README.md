@@ -56,7 +56,6 @@ AI demos:
 | `F7`               | Select scope cursor (SHIFT selects global)                  |
 | `F9`               | Enable auto advance (SHIFT disables)                        |
 | `F10`              | Playback                                                    |
-| `F12`              | Toggle debug info (default on in dev)                       |
 | `CTRL + 0-9`       | Select color from palette                                   |
 | `Cursor`           | Move around                                                 |
 | `SHIFT + Cursor`   | (Re)Paint current cell and move around                      |
@@ -70,6 +69,7 @@ AI demos:
 | `CTRL + S`         | Download demo                                               |
 | `CTRL + O`         | Open demo (also via Drag & Drop)                            |
 | `CTRL + G`         | AI generate demo                                            |
+| `CTRL + SHIFT + F` | Toggle debug info (default on in dev)                       |
 | `SHIFT + F5`       | Reset                                                       |
 
 ### Hash URLs
