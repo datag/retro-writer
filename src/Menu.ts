@@ -10,7 +10,7 @@ const SHORTCUTS: [string, string][] = [
     ['F7', 'Select scope cursor (SHIFT global)'],
     ['F9', 'Enable auto advance (SHIFT disables)'],
     ['F10', 'Playback'],
-    ['F12', 'Toggle debug info'],
+    ['CTRL + SHIFT + F', 'Toggle debug info'],
     ['CTRL + 0-9', 'Select color from palette'],
     ['Cursor', 'Move around'],
     ['SHIFT + Cursor', '(Re)Paint current cell and move'],
