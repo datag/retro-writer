@@ -134,6 +134,26 @@ export default class Screen {
         c.fillText(text, x - distance, y - distance);
         c.strokeStyle = 'white';
         c.strokeText(text, x - distance, y - distance);
+
+        this.#renderPauseHint(y + fontSize * 0.75);
+    }
+
+    /**
+     * Renders the hint about the help below the pause message
+     * @param y Baseline of the hint
+     */
+    #renderPauseHint(y: number) {
+        const c = this.#ctx;
+
+        const text = 'Press F1 for help';
+        const fontSize = this.#cellHeight * 1.2;
+
+        c.font = `${fontSize}px monospace`;
+
+        const metrics = c.measureText(text);
+
+        c.fillStyle = '#cccccc';
+        c.fillText(text, this.#canvas.width / 2 - metrics.width / 2, y);
     }
 
     #renderCells(writer: Writer) {
