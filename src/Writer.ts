@@ -59,6 +59,9 @@ export default class Writer {
     /** Whether to show FPS and debug data */
     renderDebugInfo: boolean = false;
 
+    /** Called when the playback of a demo has ended */
+    onPlaybackEnd: (() => void) | null = null;
+
     // From here on properties to be set on init()...
 
     #appState: 'record' | 'play' | 'pause' | 'menu';
@@ -212,6 +215,8 @@ export default class Writer {
 
         this.#appState = 'record';
         console.info('Playback skipped to end, switched back to record state');
+
+        this.onPlaybackEnd?.();
     }
 
     reset() {
@@ -244,6 +249,8 @@ export default class Writer {
                 } else {
                     this.#appState = 'record';
                     console.info('Playback stopped, switched back to record state');
+
+                    this.onPlaybackEnd?.();
                 }
             }
         }

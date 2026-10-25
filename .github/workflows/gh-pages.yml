@@ -44,6 +44,13 @@ jobs:
       run: pnpm install
 
     - name: Build the project
+      # Optional build-time configuration for the app menu. Both variables are
+      # public (a mail address and a URL), so they are stored as repository
+      # variables, not secrets. Unset variables simply hide the corresponding
+      # part of the menu.
+      env:
+        APP_OPERATOR_MAIL: ${{ vars.APP_OPERATOR_MAIL }}
+        APP_PRIVACY_POLICY_URL: ${{ vars.APP_PRIVACY_POLICY_URL }}
       run: pnpm build --base=/${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}/
 
     - name: Upload artifact

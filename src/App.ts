@@ -1,6 +1,7 @@
 import Writer from './Writer';
 import Demo from './Demo';
 import AiDialog from './AiDialog';
+import Menu from './Menu';
 
 export default class App {
     /** App version */
@@ -21,6 +22,9 @@ export default class App {
     /** The AI generate dialog */
     #aiDialog: AiDialog;
 
+    /** The menu shown on first visit */
+    #menu: Menu;
+
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
 
@@ -28,6 +32,8 @@ export default class App {
             this.#writer.importDemo(data);
             this.#writer.play();
         });
+
+        this.#menu = new Menu();
 
         window.addEventListener('resize', (event) => this.#onResize(event));
 
@@ -44,7 +50,38 @@ export default class App {
 
         this.#writer.renderDebugInfo = import.meta.env.DEV;
 
-        this.#handleHashUrl();
+        const demoAutoloaded = App.#hasDemoHashUrl();
+        const visibility = Menu.visibility(demoAutoloaded);
+
+        this.#writer.onPlaybackEnd = () => {
+            if (visibility.afterDemo && !this.#menu.isOpen) {
+                this.#openMenu();
+            }
+        };
+
+        if (visibility.atStart) {
+            this.#openMenu(() => this.#handleHashUrl());
+        } else {
+            this.#handleHashUrl();
+        }
+    }
+
+    /**
+     * Opens the menu.
+     * @param onClose called after the menu has been closed
+     */
+    #openMenu(onClose?: () => void) {
+        this.#menu.open(() => {
+            Menu.markSeen();
+            onClose?.();
+        });
+    }
+
+    /**
+     * @returns true if the hash URL requests a demo to be played automatically
+     */
+    static #hasDemoHashUrl(hash: string = document.location.hash): boolean {
+        return hash.match(/^#(?<action>play|play-gist):/) !== null;
     }
 
     #onResize(_event: Event) {
@@ -52,7 +89,7 @@ export default class App {
     }
 
     #onKeyDown(event: KeyboardEvent) {
-        if (this.#aiDialog.isOpen) {
+        if (this.#menu.isOpen || this.#aiDialog.isOpen) {
             return;
         }
 
@@ -75,6 +112,13 @@ export default class App {
 
         if (key === 'PrintScreen' || (ctrlKey && key === 'p')) {
             this.downloadScreenshot();
+            handled = true;
+        } else if (key === 'F1') {
+            const wasPlaying = writer.appState === 'play';
+            if (wasPlaying) writer.appState = 'pause';
+            this.#openMenu(() => {
+                if (wasPlaying) writer.appState = 'play';
+            });
             handled = true;
         } else if (key === 'F5' && shiftKey) {
             writer.reset();
@@ -250,6 +294,7 @@ export default class App {
     printHelp() {
         const help = [
             `RetroWriter ${App.appVersion} -- Help:`,
+            'F1                  Show shortcuts / help',
             'F2                  Select foreground   (SHIFT clears)',
             'F3                  Select background   (SHIFT clears)',
             'F4                  Select border       (SHIFT clears)',
