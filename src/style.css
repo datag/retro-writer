@@ -12,8 +12,8 @@ canvas.writer {
     outline: solid 1px lightgray;
 }
 
-/* Splash Screen */
-.splash-overlay {
+/* Menu */
+.menu-overlay {
     display: none;
     position: fixed;
     inset: 0;
@@ -24,7 +24,7 @@ canvas.writer {
     font-family: monospace;
 }
 
-.splash-dialog {
+.menu-dialog {
     background: #111111;
     border: 2px solid #ffcc00;
     color: #eeeeee;
@@ -37,13 +37,13 @@ canvas.writer {
     gap: 16px;
 }
 
-.splash-header {
+.menu-header {
     display: flex;
     align-items: baseline;
     gap: 12px;
 }
 
-.splash-title {
+.menu-title {
     font-size: 1.4rem;
     font-weight: bold;
     color: #ffcc00;
@@ -51,54 +51,54 @@ canvas.writer {
     text-transform: uppercase;
 }
 
-.splash-version {
+.menu-version {
     font-size: 0.8rem;
     color: #888888;
 }
 
-.splash-shortcuts {
+.menu-shortcuts {
     border-collapse: collapse;
     width: 100%;
     font-size: 0.8rem;
 }
 
-.splash-shortcuts td {
+.menu-shortcuts td {
     padding: 2px 0;
     vertical-align: top;
 }
 
-.splash-key {
+.menu-key {
     color: #ffcc00;
     white-space: nowrap;
     padding-right: 16px !important;
     min-width: 140px;
 }
 
-.splash-desc {
+.menu-desc {
     color: #cccccc;
 }
 
-.splash-footer {
+.menu-footer {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.splash-progress {
+.menu-progress {
     height: 2px;
     background: #333333;
     overflow: hidden;
 }
 
-.splash-progress-bar {
+.menu-progress-bar {
     height: 100%;
     background: #ffcc00;
     width: 100%;
     transform-origin: left;
-    animation: splash-countdown 5s linear forwards;
+    animation: menu-countdown 5s linear forwards;
 }
 
-@keyframes splash-countdown {
+@keyframes menu-countdown {
     from {
         transform: scaleX(1);
     }
@@ -107,7 +107,7 @@ canvas.writer {
     }
 }
 
-.splash-hint {
+.menu-hint {
     font-size: 0.75rem;
     color: #666666;
     text-align: center;

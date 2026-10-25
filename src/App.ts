@@ -1,7 +1,7 @@
 import Writer from './Writer';
 import Demo from './Demo';
 import AiDialog from './AiDialog';
-import SplashScreen from './SplashScreen';
+import Menu from './Menu';
 
 export default class App {
     /** App version */
@@ -22,8 +22,8 @@ export default class App {
     /** The AI generate dialog */
     #aiDialog: AiDialog;
 
-    /** The splash screen shown on first visit */
-    #splashScreen: SplashScreen;
+    /** The menu shown on first visit */
+    #menu: Menu;
 
     constructor(canvas: HTMLCanvasElement) {
         this.#writer = new Writer(canvas, window.innerWidth, window.innerHeight);
@@ -33,7 +33,7 @@ export default class App {
             this.#writer.play();
         });
 
-        this.#splashScreen = new SplashScreen();
+        this.#menu = new Menu();
 
         window.addEventListener('resize', (event) => this.#onResize(event));
 
@@ -50,9 +50,9 @@ export default class App {
 
         this.#writer.renderDebugInfo = import.meta.env.DEV;
 
-        if (!SplashScreen.hasBeenSeen) {
-            this.#splashScreen.open(() => {
-                SplashScreen.markSeen();
+        if (!Menu.hasBeenSeen) {
+            this.#menu.open(() => {
+                Menu.markSeen();
                 this.#handleHashUrl();
             });
         } else {
@@ -65,7 +65,7 @@ export default class App {
     }
 
     #onKeyDown(event: KeyboardEvent) {
-        if (this.#splashScreen.isOpen || this.#aiDialog.isOpen) {
+        if (this.#menu.isOpen || this.#aiDialog.isOpen) {
             return;
         }
 
@@ -92,7 +92,7 @@ export default class App {
         } else if (key === 'F1') {
             const wasPlaying = writer.appState === 'play';
             if (wasPlaying) writer.appState = 'pause';
-            this.#splashScreen.open(() => {
+            this.#menu.open(() => {
                 if (wasPlaying) writer.appState = 'play';
             }, false);
             handled = true;

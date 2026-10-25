@@ -1,4 +1,4 @@
-const SEEN_KEY = 'retrowriter.splash.seen';
+const SEEN_KEY = 'retrowriter.menu.seen';
 const AUTO_DISMISS_MS = 5000;
 
 const SHORTCUTS: [string, string][] = [
@@ -29,12 +29,12 @@ const SHORTCUTS: [string, string][] = [
     ['#play-gist:<id>', 'Hash URL: Play demo from GitHub Gist'],
 ];
 
-export default class SplashScreen {
+export default class Menu {
     #overlay: HTMLDivElement;
 
     constructor() {
         this.#overlay = document.createElement('div');
-        this.#overlay.className = 'splash-overlay';
+        this.#overlay.className = 'menu-overlay';
         document.body.appendChild(this.#overlay);
     }
 
@@ -77,27 +77,25 @@ export default class SplashScreen {
         const version = import.meta.env.VITE_PACKAGE_VERSION as string;
 
         const shortcutRows = SHORTCUTS.map(
-            ([key, desc]) => `<tr><td class="splash-key">${key}</td><td class="splash-desc">${desc}</td></tr>`,
+            ([key, desc]) => `<tr><td class="menu-key">${key}</td><td class="menu-desc">${desc}</td></tr>`,
         ).join('');
 
-        const progressBar = autoDismiss
-            ? `<div class="splash-progress"><div class="splash-progress-bar"></div></div>`
-            : '';
+        const progressBar = autoDismiss ? `<div class="menu-progress"><div class="menu-progress-bar"></div></div>` : '';
 
         const hint = autoDismiss ? 'Press any key or click to continue' : 'Press any key or click to close';
 
         this.#overlay.innerHTML = `
-            <div class="splash-dialog">
-                <div class="splash-header">
-                    <span class="splash-title">RetroWriter</span>
-                    <span class="splash-version">v${version}</span>
+            <div class="menu-dialog">
+                <div class="menu-header">
+                    <span class="menu-title">RetroWriter</span>
+                    <span class="menu-version">v${version}</span>
                 </div>
-                <table class="splash-shortcuts">
+                <table class="menu-shortcuts">
                     <tbody>${shortcutRows}</tbody>
                 </table>
-                <div class="splash-footer">
+                <div class="menu-footer">
                     ${progressBar}
-                    <div class="splash-hint">${hint}</div>
+                    <div class="menu-hint">${hint}</div>
                 </div>
             </div>
         `;
