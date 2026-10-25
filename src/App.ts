@@ -50,14 +50,39 @@ export default class App {
 
         this.#writer.renderDebugInfo = import.meta.env.DEV;
 
-        if (!Menu.hasBeenSeen) {
-            this.#menu.open(() => {
-                Menu.markSeen();
-                this.#handleHashUrl();
-            });
+        const demoAutoloaded = App.#hasDemoHashUrl();
+        const visibility = Menu.visibility(demoAutoloaded);
+
+        this.#writer.onPlaybackEnd = () => {
+            if (visibility.afterDemo && !this.#menu.isOpen) {
+                this.#openMenu();
+            }
+        };
+
+        if (visibility.atStart) {
+            this.#openMenu(() => this.#handleHashUrl());
         } else {
             this.#handleHashUrl();
         }
+    }
+
+    /**
+     * Opens the menu.
+     * @param onClose called after the menu has been closed
+     * @param autoDismiss whether the menu closes automatically after a while
+     */
+    #openMenu(onClose?: () => void, autoDismiss = true) {
+        this.#menu.open(() => {
+            Menu.markSeen();
+            onClose?.();
+        }, autoDismiss);
+    }
+
+    /**
+     * @returns true if the hash URL requests a demo to be played automatically
+     */
+    static #hasDemoHashUrl(hash: string = document.location.hash): boolean {
+        return hash.match(/^#(?<action>play|play-gist):/) !== null;
     }
 
     #onResize(_event: Event) {
@@ -92,7 +117,7 @@ export default class App {
         } else if (key === 'F1') {
             const wasPlaying = writer.appState === 'play';
             if (wasPlaying) writer.appState = 'pause';
-            this.#menu.open(() => {
+            this.#openMenu(() => {
                 if (wasPlaying) writer.appState = 'play';
             }, false);
             handled = true;

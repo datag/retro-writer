@@ -3,6 +3,9 @@ import { appConfig, privacyPolicyUrl } from './AppConfig';
 const SEEN_KEY = 'retrowriter.menu.seen';
 const AUTO_DISMISS_MS = 5000;
 
+/** Values of the seen flag that mark the menu as seen */
+const SEEN_VALUES = ['1', 'true', 'yes', 'on'];
+
 const SHORTCUTS: [string, string][] = [
     ['F1', 'Show shortcuts / help'],
     ['F2', 'Select foreground (SHIFT clears)'],
@@ -43,6 +46,15 @@ function escapeHtml(value: string): string {
         .replace(/'/g, '&#39;');
 }
 
+/** When the menu is shown */
+export interface MenuVisibility {
+    /** Whether the menu is shown when the app starts */
+    atStart: boolean;
+
+    /** Whether the menu is shown when an autoloaded demo has finished playing */
+    afterDemo: boolean;
+}
+
 export default class Menu {
     #overlay: HTMLDivElement;
 
@@ -52,12 +64,40 @@ export default class Menu {
         document.body.appendChild(this.#overlay);
     }
 
+    /**
+     * @returns true if the menu has already been seen
+     */
     static get hasBeenSeen(): boolean {
-        return localStorage.getItem(SEEN_KEY) !== null;
+        const value = localStorage.getItem(SEEN_KEY)?.trim().toLowerCase() ?? '';
+
+        return SEEN_VALUES.includes(value);
     }
 
     static markSeen() {
         localStorage.setItem(SEEN_KEY, '1');
+    }
+
+    /**
+     * Determines when the menu is shown.
+     *
+     * In development the menu greets the user until it has been seen once.
+     * In production the menu is always shown, but a demo that is autoloaded
+     * should play first - so the menu is shown once that demo has finished.
+     *
+     * @param demoAutoloaded true if a demo is loaded and played automatically
+     */
+    static visibility(demoAutoloaded: boolean): MenuVisibility {
+        if (import.meta.env.DEV) {
+            return {
+                atStart: !Menu.hasBeenSeen,
+                afterDemo: false,
+            };
+        }
+
+        return {
+            atStart: !demoAutoloaded,
+            afterDemo: demoAutoloaded,
+        };
     }
 
     get isOpen(): boolean {
