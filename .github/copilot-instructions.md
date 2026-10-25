@@ -22,6 +22,7 @@ main.ts → App → Writer → Screen (canvas rendering)
                        → Cell[] (40×25 grid)
                        → Cursor
         → AiDialog → AiGenerator → AiDsl (DSL compiler)
+        → Menu → AppConfig (operator mail / privacy policy)
 ```
 
 **`Writer`** is the core. It owns the grid (`Cell[]`), the cursor, the demo recording, and the animation loop (`mainLoop` via `requestAnimationFrame`). It has three states: `'record'` | `'play'` | `'pause'`.
@@ -79,6 +80,14 @@ Demos can be loaded from: local file (drag-drop or file picker), URL (`#play:<ur
 
 **DSL command array format** (what the AI returns inside `{ "commands": [...] }`):
 `write`, `newline`, `move`, `color`, `globalColor`, `pulse`, `globalPulse`, `scroll` — see `docs/plans/2026-03-04-ai-generate-design.md` for full reference.
+
+## Menu (F1)
+
+`Menu` is an HTML overlay UI (analogous to `AiDialog`) that lists the keyboard shortcuts and the contact information. `App` opens it on the first start and on `F1`.
+
+- **When it is shown** (`Menu.visibility()`): in development only until it has been seen once - the flag `retrowriter.menu.seen` in `localStorage` counts as "seen" when it is `1`, `true`, `yes` or `on`. In production it is always shown, but a demo that is autoloaded via the hash URL (`#play:<url>`, `#play-gist:<id>`) plays first, so the menu is shown once that demo has finished (`Writer.onPlaybackEnd`).
+- The menu is closed with a key press (there is no timeout). While it is open, the canvas doesn't receive keyboard events.
+- **Contact and privacy** (`src/AppConfig.ts`): `APP_OPERATOR_MAIL` and `APP_PRIVACY_POLICY_URL` are optional build-time variables (see `vite.config.ts` and `.env.example`). The privacy policy is linked with the anchor `#en`, as the app is only targeted at English speaking persons. Unset variables hide the corresponding part of the menu.
 
 ## Deployment
 

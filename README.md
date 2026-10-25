@@ -45,10 +45,15 @@ AI demos:
 
 ## RetroWriter Help
 
+### Menu
+
+The menu shows the keyboard shortcuts and - if configured - the mail address of the operator and a link to the privacy policy. It is shown on the first start and can be opened at any time with `F1`. It is closed with a key press.
+
 ### Keys
 
 | Key/Command        | Action                                                      |
 | ------------------ | ----------------------------------------------------------- |
+| `F1`               | Show shortcuts / help                                       |
 | `F2`               | Select foreground (SHIFT clears)                            |
 | `F3`               | Select background (SHIFT clears)                            |
 | `F4`               | Select border (SHIFT clears)                                |
@@ -87,3 +92,14 @@ pnpm dev
 ```
 
 And then browse to http://localhost:5173/.
+
+### Configuration
+
+The menu can show the mail address of the operator and a link to the privacy policy. Both are optional and configured via environment variables (see `.env.example`):
+
+| Variable                 | Description                                                  |
+| ------------------------ | ------------------------------------------------------------ |
+| `APP_OPERATOR_MAIL`      | Mail address of the operator, shown as a mailto link         |
+| `APP_PRIVACY_POLICY_URL` | Base URL of the privacy policy, linked with the `#en` anchor |
+
+Locally, put them into a `.env.local` file. In CI, they are read from repository variables. Unset variables simply hide the corresponding part of the menu.
